@@ -52,8 +52,9 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        var moves = return new HashSet<ChessMoves>;
-        moves.add(new ChessMove(new ChessPosition(5,4), new ChessPosition(6,5), null));
-        return moves;
+//        var moves = return new HashSet<ChessMoves>;
+//        moves.add(new ChessMove(new ChessPosition(5,4), new ChessPosition(6,5), null));
+//        return moves;
+          return;
     }
 }

@@ -23,14 +23,18 @@ public class ChessMove {
      * @return ChessPosition of starting location
      */
     public ChessPosition getStartPosition() {
-        throw new RuntimeException("Not implemented");
+        return startPosition;
     }
 
     /**
      * @return ChessPosition of ending location
      */
+    // math is your friend
+    //there's some obvious recursion right there
+    // are there better ways?
+    // where do we put these rules? do we have a subclass? or are they part of the chess piece? (object oriented, classes that represent the rules for each piece)
     public ChessPosition getEndPosition() {
-        throw new RuntimeException("Not implemented");
+        return endPosition;
     }
 
     /**
@@ -40,7 +44,12 @@ public class ChessMove {
      * @return Type of piece to promote a pawn to, or null if no promotion
      */
     public ChessPiece.PieceType getPromotionPiece() {
-        return endPosition;
+        return promotionPiece;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s%s", startPosition, endPosition);
     }
 }
 
