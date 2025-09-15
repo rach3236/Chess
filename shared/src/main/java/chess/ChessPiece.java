@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Represents a single chess piece
@@ -52,9 +54,13 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-//        var moves = return new HashSet<ChessMoves>;
-//        moves.add(new ChessMove(new ChessPosition(5,4), new ChessPosition(6,5), null));
-//        return moves;
-          return;
+        ChessPiece piece = board.getPiece(myPosition);
+        Collection<ChessMove> poss_positions = new ArrayList<>();
+        if (piece.getPieceType() == PieceType.BISHOP){
+              //Call Bishop function, pass in empty list, (and board and position)
+            // function will keep moving, and it'll return poss_position
+//            return List.of(new ChessMove(new ChessPosition(5,4), new ChessPosition(1,8), null));
+        }
+        return poss_positions;
     }
 }
