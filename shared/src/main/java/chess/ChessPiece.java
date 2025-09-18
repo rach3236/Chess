@@ -55,12 +55,17 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
-        Collection<ChessMove> poss_positions = new ArrayList<>();
+        Collection<ChessMove> possible_moves = new ArrayList<>();
+
+        Rulebook rules = new Rulebook();
+
         if (piece.getPieceType() == PieceType.BISHOP){
-              //Call Bishop function, pass in empty list, (and board and position)
-            // function will keep moving, and it'll return poss_position
-//            return List.of(new ChessMove(new ChessPosition(5,4), new ChessPosition(1,8), null));
+            possible_moves = rules.bishop_rules(myPosition, board);
+        } else if (piece.getPieceType() == PieceType.ROOK) {
+            possible_moves = rules.rook_rules(myPosition, board);
+        } else if (piece.getPieceType() == PieceType.QUEEN) {
+            possible_moves = rules.queen_rules(myPosition, board);
         }
-        return poss_positions;
+        return possible_moves;
     }
 }
