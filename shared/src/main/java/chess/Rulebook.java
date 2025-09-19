@@ -2,7 +2,6 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class Rulebook {
 
@@ -29,11 +28,11 @@ public class Rulebook {
     private boolean if_pawn() {
         return (myPiece.getPieceType() == ChessPiece.PieceType.PAWN);
     }
-//    private boolean first_move(){
-//        return
-//    }
+    private boolean first_move(ChessPosition myPosition){
+        return (myPosition.getRow() == 2 && myPiece.getPieceType() == ChessPiece.PieceType.PAWN);
+    }
     private boolean run_checks(ChessPosition newPosition, ChessBoard board) {
-        return (in_bounds(newPosition) && check_square(newPosition, board));
+        return (in_bounds(newPosition) && check_square(newPosition, board) && !enemy_piece(newPosition, board));
     }
 
 // Movement functions
@@ -52,7 +51,6 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
         } else if (!enemy_piece(new_position, board)) {
             return;
         }
-        return;
     }
 
     public void up_left(ChessPosition myPosition, Collection<ChessPosition> poss_positions, ChessBoard board) {
@@ -70,7 +68,6 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
         } else if (!enemy_piece(new_position, board)) {
             return;
         }
-        return;
     }
 
     public void down_right(ChessPosition myPosition, Collection<ChessPosition> poss_positions, ChessBoard board) {
@@ -88,7 +85,6 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
         } else if (!enemy_piece(new_position, board)) {
             return;
         }
-        return;
     }
 
     public void down_left(ChessPosition myPosition, Collection<ChessPosition> poss_positions, ChessBoard board) {
@@ -106,7 +102,6 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
         } else if (!enemy_piece(new_position, board)) {
             return;
         }
-        return;
     }
 
     public void straight_up(ChessPosition myPosition, Collection<ChessPosition> poss_positions, ChessBoard board) {
@@ -125,7 +120,6 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
         } else if (!enemy_piece(new_position, board)) {
             return;
         }
-        return;
 
         }
 
@@ -144,7 +138,6 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
         } else if (!enemy_piece(new_position, board)) {
             return;
         }
-        return;
 
     }
 
@@ -163,7 +156,6 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
         } else if (!enemy_piece(new_position, board)) {
             return;
         }
-        return;
 
     }
 
@@ -331,20 +323,26 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
 
         //HELP
 
-//        straight_up(myPosition, poss_positions, board);
-//        if (first_move) {
-//            poss_positions.add(new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()));
-//        }
+        straight_up(myPosition, poss_positions, board);
+        if (first_move(myPosition)) {
+            poss_positions.add(new ChessPosition(myPosition.getRow()+2, myPosition.getColumn()));
+        }
 
+        ChessPosition poss_enemy_piece_positions1 = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()+1);
+        ChessPosition poss_enemy_piece_positions2 = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()-1);
 
-        //if first time
-        // poss moves are row+2, col, row+1, col,
-            // and if there's an enemy piece row+1, col+1, or row-1, col-1, add to poss_positions
-
+        if (enemy_piece(poss_enemy_piece_positions1, board)) {
+            poss_positions.add(poss_enemy_piece_positions1);
+        }
+        if (enemy_piece(poss_enemy_piece_positions2, board)) {
+            poss_positions.add(poss_enemy_piece_positions2);
+        }
 
 
         //if end of board (.getRow() == 8) promotion = TRUE
-
+//        if (myPosition.getRow() == 8) {
+//            myPiece.getPieceType() = ChessPiece.PieceType.(ChessMove.getPromotionPiece());
+//        }
 
         Collection<ChessMove> possible_moves = new ArrayList<>();
         for (ChessPosition pos : poss_positions) {

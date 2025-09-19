@@ -2,7 +2,6 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Represents a single chess piece
@@ -69,6 +68,8 @@ public class ChessPiece {
             possible_moves = rules.king_rules(myPosition, board);
         } else if (piece.getPieceType() == PieceType.KNIGHT) {
             possible_moves = rules.knight_rules(myPosition, board);
+        } else if (piece.getPieceType() == PieceType.PAWN) {
+            possible_moves = rules.pawn_rules(myPosition, board);
         }
         return possible_moves;
     }
