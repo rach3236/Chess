@@ -65,6 +65,10 @@ public class ChessPiece {
             possible_moves = rules.rook_rules(myPosition, board);
         } else if (piece.getPieceType() == PieceType.QUEEN) {
             possible_moves = rules.queen_rules(myPosition, board);
+        } else if (piece.getPieceType() == PieceType.KING) {
+            possible_moves = rules.king_rules(myPosition, board);
+        } else if (piece.getPieceType() == PieceType.KNIGHT) {
+            possible_moves = rules.knight_rules(myPosition, board);
         }
         return possible_moves;
     }

@@ -26,6 +26,12 @@ public class Rulebook {
     private boolean if_king() {
         return (myPiece.getPieceType() == ChessPiece.PieceType.KING);
     }
+    private boolean if_pawn() {
+        return (myPiece.getPieceType() == ChessPiece.PieceType.PAWN);
+    }
+//    private boolean first_move(){
+//        return
+//    }
     private boolean run_checks(ChessPosition newPosition, ChessBoard board) {
         return (in_bounds(newPosition) && check_square(newPosition, board));
     }
@@ -111,6 +117,7 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
         } else if (check_square(new_position, board)){
             poss_positions.add(new_position);
             if (if_king()) {return;}
+            else if (if_pawn()) {return;}
             straight_up(new_position, poss_positions, board);
         } else if (enemy_piece(new_position, board)) {
             poss_positions.add(new_position);
@@ -324,7 +331,15 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
 
         //HELP
 
+//        straight_up(myPosition, poss_positions, board);
+//        if (first_move) {
+//            poss_positions.add(new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()));
+//        }
+
+
         //if first time
+        // poss moves are row+2, col, row+1, col,
+            // and if there's an enemy piece row+1, col+1, or row-1, col-1, add to poss_positions
 
 
 
