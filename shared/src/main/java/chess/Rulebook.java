@@ -29,7 +29,7 @@ public class Rulebook {
         return (myPiece.getPieceType() == ChessPiece.PieceType.PAWN);
     }
     private boolean first_move(ChessPosition myPosition){
-        return (myPosition.getRow() == 2 && myPiece.getPieceType() == ChessPiece.PieceType.PAWN);
+        return (myPosition.getRow() == 2 && myPiece.getPieceType() == ChessPiece.PieceType.PAWN && myPiece.getTeamColor() == ChessGame.TeamColor.WHITE);
     }
     private boolean run_checks(ChessPosition newPosition, ChessBoard board) {
         return (in_bounds(newPosition) && check_square(newPosition, board) && !enemy_piece(newPosition, board));
@@ -324,9 +324,14 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
         //HELP
 
         straight_up(myPosition, poss_positions, board);
+
+        if
+
         if (first_move(myPosition)) {
             poss_positions.add(new ChessPosition(myPosition.getRow()+2, myPosition.getColumn()));
         }
+
+        //first move is either row 2 or row 7, based on piece color (white is row 2)
 
         ChessPosition poss_enemy_piece_positions1 = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()+1);
         ChessPosition poss_enemy_piece_positions2 = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()-1);
@@ -338,8 +343,8 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
             poss_positions.add(poss_enemy_piece_positions2);
         }
 
-
-        //if end of board (.getRow() == 8) promotion = TRUE
+        // you only have to add to the list of moves, (add move that gets you to the top, plus bishop, rook, knight, and queen rules)
+//        if end of board (.getRow() == 8) promotion = TRUE
 //        if (myPosition.getRow() == 8) {
 //            myPiece.getPieceType() = ChessPiece.PieceType.(ChessMove.getPromotionPiece());
 //        }
