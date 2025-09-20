@@ -32,12 +32,12 @@ public class Rulebook {
     private boolean if_pawn() {
         return (myPiece.getPieceType() == ChessPiece.PieceType.PAWN);
     }
-    private boolean first_move_white(ChessPosition myPosition){
-        return (myPosition.getRow() == 2);
+    private boolean first_move_check(ChessPosition move) {
+        if (move.getRow() == 2 && myPiece.getTeamColor() == ChessGame.TeamColor.WHITE) return true;
+        else if (move.getRow() == 7 && myPiece.getTeamColor() == ChessGame.TeamColor.BLACK) return true;
+        else return false;
     }
-//    private boolean first_move_black(ChessPosition myPosition) {
-//        return (myPosition.getRow());
-//    }
+
     private boolean run_checks(ChessPosition newPosition, ChessBoard board) {
         return (in_bounds(newPosition)  && (check_square(newPosition, board) || enemy_piece(newPosition, board)));
     }
@@ -118,7 +118,8 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
             return;
         } else if (check_square(new_position, board)){
             poss_positions.add(new_position);
-            if (if_king() || if_pawn()) {return;}
+            if (if_king()) {return;}
+            else if (if_pawn()) {return;}
             straight_up(new_position, poss_positions, board);
         } else if (enemy_piece(new_position, board)) {
             poss_positions.add(new_position);
@@ -126,6 +127,7 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
         } else if (!enemy_piece(new_position, board)) {
             return;
         }
+        return;
 
         }
 
@@ -334,71 +336,22 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
 
         myPiece = board.getPiece(myPosition);
 
-        //for white pawns going up
+
         if (myPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-            if (first_move_white(myPosition)) {
-                ChessPosition first_new_position = new ChessPosition(myPosition.getRow()+2, myPosition.getColumn());
-                if (run_checks(first_new_position, board)) poss_positions.add(first_new_position);
-                straight_up(myPosition, poss_positions, board);
-            } else if (myPosition.getRow() == 7) {
-                ChessPosition new_position = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
-                if (run_checks(new_position, board)) poss_positions.add(new_position);
+            ChessPosition first_move = new ChessPosition(myPosition.getRow()+2, myPosition.getColumn());
+            if (first_move_check(first_move)) {
+                poss_positions.add(first_move);
             }
-//            } else if (myPosition.getRow() == 8) {
-//                straight_down(myPosition, poss_positions, board);
-//                straight_up(myPosition, poss_positions, board);
-//                straight_left(myPosition, poss_positions, board);
-//                straight_right(myPosition, poss_positions, board);
-//                up_right(myPosition, poss_positions, board);
-//                up_left(myPosition, poss_positions, board);
-//                down_right(myPosition, poss_positions, board);
-//                down_left(myPosition, poss_positions, board);
-//                knight_moves(myPosition, poss_positions, board);
+            straight_up(myPosition, poss_positions, board);
 
-
-            ChessPosition poss_w_enemy_piece_positions1 = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()+1);
-            ChessPosition poss_w_enemy_piece_positions2 = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()-1);
-//
-//            if (enemy_piece(poss_w_enemy_piece_positions1, board)) {
-//                poss_positions.add(poss_w_enemy_piece_positions1);
+//            ChessPosition enemy_pos = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()+1);
+//            if (enemy_piece(enemy_pos, board)) {
+//                poss_positions.add(enemy_pos);
 //            }
-//            if (enemy_piece(poss_w_enemy_piece_positions2, board)) {
-//                poss_positions.add(poss_w_enemy_piece_positions2);
+//            else if (enemy_piece(new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()-1), board)) {
+//                poss_positions.add(new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()-1));
 //            }
-
         }
-
-//        if (myPiece.getTeamColor() == ChessGame.TeamColor.BLACK) {
-//            if (first_move_black(myPosition)) {
-//                poss_positions.add(new ChessPosition(myPosition.getRow()-2, myPosition.getColumn()));
-//                straight_down(myPosition, poss_positions, board);
-//            } else if (myPosition.getRow() == 2) {
-//                poss_positions.add(new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn()));
-//            }
-////            else if (myPosition.getRow() == 8) {
-////                straight_down(myPosition, poss_positions, board);
-////                straight_up(myPosition, poss_positions, board);
-////                straight_left(myPosition, poss_positions, board);
-////                straight_right(myPosition, poss_positions, board);
-////                up_right(myPosition, poss_positions, board);
-////                up_left(myPosition, poss_positions, board);
-////                down_right(myPosition, poss_positions, board);
-////                down_left(myPosition, poss_positions, board);
-////                knight_moves(myPosition, poss_positions, board);
-//
-//
-//
-//            ChessPosition poss_b_enemy_piece_positions1 = new ChessPosition(myPosition.getRow()-1, myPosition.getColumn()+1);
-//            ChessPosition poss_b_enemy_piece_positions2 = new ChessPosition(myPosition.getRow()-1, myPosition.getColumn()-1);
-//
-//            if (enemy_piece(poss_b_enemy_piece_positions1, board)) {
-//                poss_positions.add(poss_b_enemy_piece_positions1);
-//            }
-//            if (enemy_piece(poss_b_enemy_piece_positions2, board)) {
-//                poss_positions.add(poss_b_enemy_piece_positions2);
-//            }
-//        }
-
 
         // you only have to add to the list of moves, (add move that gets you to the top, plus bishop, rook, knight, and queen rules)
 
