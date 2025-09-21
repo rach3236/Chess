@@ -343,7 +343,7 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
             if (in_bounds(up_move) && check_square(up_move, board)) {poss_positions.add(up_move);}
 
             ChessPosition first_move = new ChessPosition(myPosition.getRow()+2, myPosition.getColumn());
-            if (first_move_check(myPosition) && in_bounds(first_move) && check_square(first_move, board) && check_square(up_move, board)) {
+            if (in_bounds(first_move) && first_move_check(myPosition) && check_square(first_move, board) && check_square(up_move, board)) {
                 poss_positions.add(first_move);
             }
 
@@ -354,11 +354,17 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
                 }
             }
             ChessPosition enemy_pos2 = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()-1);
-            if (!check_square(enemy_pos2, board) && in_bounds(enemy_pos2)) {
-                if (enemy_piece(enemy_pos2, board)) {
-                    poss_positions.add(enemy_pos2);
+            if (in_bounds(enemy_pos2)){
+                if (!check_square(enemy_pos2, board)) {
+
+                    if (enemy_piece(enemy_pos2, board)) {
+                          poss_positions.add(enemy_pos2);
+                    }
                 }
             }
+
+
+
 
         }
 
@@ -369,7 +375,7 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
             if (in_bounds(down_move) && check_square(down_move, board)) {poss_positions.add(down_move);}
 
             ChessPosition first_move = new ChessPosition(myPosition.getRow()-2, myPosition.getColumn());
-            if (first_move_check(myPosition) && in_bounds(first_move) && check_square(first_move, board) && check_square(down_move, board)) {poss_positions.add(first_move);}
+            if (in_bounds(first_move) && first_move_check(myPosition) && check_square(first_move, board) && check_square(down_move, board)) {poss_positions.add(first_move);}
 
             ChessPosition enemy_pos1 = new ChessPosition(myPosition.getRow()-1, myPosition.getColumn()+1);
             if (in_bounds(enemy_pos1) && !check_square(enemy_pos1, board)) {
@@ -378,10 +384,14 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
                 }
             }
             ChessPosition enemy_pos2 = new ChessPosition(myPosition.getRow()-1, myPosition.getColumn()-1);
-            if (!check_square(enemy_pos2, board) && in_bounds(enemy_pos2)) {
-                if (enemy_piece(enemy_pos2, board)) {
-                    poss_positions.add(enemy_pos2);
+            if (in_bounds(enemy_pos2)) {
+                if (!check_square(enemy_pos2, board)){
+                    if (enemy_piece(enemy_pos2, board)) {
+                        poss_positions.add(enemy_pos2);
+                    }
                 }
+
+
             }
 
         }
