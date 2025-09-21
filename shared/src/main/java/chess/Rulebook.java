@@ -12,10 +12,10 @@ public class Rulebook {
     }
 // Checks
     public boolean in_bounds(ChessPosition myPosition){
-        return (myPosition.getRow() <= 8) && (myPosition.getColumn() <= 8) && (myPosition.getRow() > 0) && (myPosition.getColumn() > 0);
+        return (myPosition.getRow() <= 8) && (myPosition.getColumn() <= 8) && (myPosition.getRow() >= 1) && (myPosition.getColumn() >= 1);
     }
     private boolean check_square(ChessPosition newPosition, ChessBoard board) {
-        return ((in_bounds(newPosition)) && (board.getPiece(newPosition) == null));
+        return (board.getPiece(newPosition) == null);
     }
     private boolean enemy_piece(ChessPosition newPosition, ChessBoard board) {
         ChessPiece piece = board.getPiece(newPosition);
@@ -338,25 +338,69 @@ public void up_right(ChessPosition myPosition, Collection<ChessPosition> poss_po
 
 
         if (myPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+
+            ChessPosition up_move = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn());
+            if (in_bounds(up_move) && check_square(up_move, board)) {poss_positions.add(up_move);}
+
             ChessPosition first_move = new ChessPosition(myPosition.getRow()+2, myPosition.getColumn());
-            if (first_move_check(first_move)) {
+            if (first_move_check(myPosition) && in_bounds(first_move) && check_square(first_move, board) && check_square(up_move, board)) {
                 poss_positions.add(first_move);
             }
-            straight_up(myPosition, poss_positions, board);
 
-//            ChessPosition enemy_pos = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()+1);
-//            if (enemy_piece(enemy_pos, board)) {
-//                poss_positions.add(enemy_pos);
-//            }
-//            else if (enemy_piece(new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()-1), board)) {
-//                poss_positions.add(new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()-1));
-//            }
+            ChessPosition enemy_pos1 = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()+1);
+            if (in_bounds(enemy_pos1) && !check_square(enemy_pos1, board)) {
+                if (enemy_piece(enemy_pos1, board)) {
+                    poss_positions.add(enemy_pos1);
+                }
+            }
+            ChessPosition enemy_pos2 = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()-1);
+            if (!check_square(enemy_pos2, board) && in_bounds(enemy_pos2)) {
+                if (enemy_piece(enemy_pos2, board)) {
+                    poss_positions.add(enemy_pos2);
+                }
+            }
+
         }
 
-        // you only have to add to the list of moves, (add move that gets you to the top, plus bishop, rook, knight, and queen rules)
+
+        if (myPiece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+
+            ChessPosition down_move = new ChessPosition(myPosition.getRow()-1, myPosition.getColumn());
+            if (in_bounds(down_move) && check_square(down_move, board)) {poss_positions.add(down_move);}
+
+            ChessPosition first_move = new ChessPosition(myPosition.getRow()-2, myPosition.getColumn());
+            if (first_move_check(myPosition) && in_bounds(first_move) && check_square(first_move, board) && check_square(down_move, board)) {poss_positions.add(first_move);}
+
+            ChessPosition enemy_pos1 = new ChessPosition(myPosition.getRow()-1, myPosition.getColumn()+1);
+            if (in_bounds(enemy_pos1) && !check_square(enemy_pos1, board)) {
+                if (enemy_piece(enemy_pos1, board)) {
+                    poss_positions.add(enemy_pos1);
+                }
+            }
+            ChessPosition enemy_pos2 = new ChessPosition(myPosition.getRow()-1, myPosition.getColumn()-1);
+            if (!check_square(enemy_pos2, board) && in_bounds(enemy_pos2)) {
+                if (enemy_piece(enemy_pos2, board)) {
+                    poss_positions.add(enemy_pos2);
+                }
+            }
+
+        }
+
 
         for (ChessPosition pos : poss_positions) {
-            possible_moves.add(new ChessMove(myPosition, pos, null));
+            if (pos.getRow() == 8 && myPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                possible_moves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.BISHOP));
+                possible_moves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.ROOK));
+                possible_moves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.QUEEN));
+                possible_moves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.KNIGHT));
+            } else if (pos.getRow() == 1 && myPiece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+                possible_moves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.BISHOP));
+                possible_moves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.ROOK));
+                possible_moves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.QUEEN));
+                possible_moves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.KNIGHT));
+            } else {
+                possible_moves.add(new ChessMove(myPosition, pos, null));
+            }
         }
 
         return possible_moves;
