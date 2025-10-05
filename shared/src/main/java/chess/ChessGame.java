@@ -9,16 +9,22 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessGame {
+    private ChessBoard board;
+    private TeamColor team;
+    private ChessBoard new_board;
 
     public ChessGame() {
-
+        this.board = new ChessBoard();
+        this.board.resetBoard();
+        this.team = TeamColor.WHITE;
     }
 
     /**
      * @return Which team's turn it is
+     *
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return team;
     }
 
     /**
@@ -27,9 +33,8 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        this.team = team;
     }
-
     /**
      * Enum identifying the 2 possible teams in a chess game
      */
