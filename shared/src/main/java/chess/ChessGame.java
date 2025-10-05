@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -19,6 +20,20 @@ public class ChessGame {
         this.board.resetBoard();
         this.team = TeamColor.WHITE;
     }
+
+    public ChessBoard Copy_Board() {
+        ChessBoard new_board = new ChessBoard();
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                ChessPosition pos = new ChessPosition(i, j);
+                if (board.getPiece(pos) != null)
+                {new_board.addPiece(pos, board.getPiece(pos));}
+            }
+        }
+        return new_board;
+    }
+
+
 
     /**
      * @return Which team's turn it is
@@ -52,8 +67,27 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        // make a new board
+        //see if the king moves into check
+        // remove those positions from valid moves
+        Collection<ChessMove> valid_moves = ChessPiece.pieceMoves(board, startPosition);
+
+        ChessPiece piece = board.getPiece(startPosition);
+
+        Collection<ChessMove> for_sure_valid = new ArrayList<ChessMove>();
+        for (ChessMove move : valid_moves) {
+            new_board = Copy_Board();
+
+            new_board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+            new_board.removePiece(move.getStartPosition());
+
+            if (!Check_Helper(piece.getTeamColor(), new_board)) {
+                for_sure_valid.add(move);
+            }
+        }
+        return for_sure_valid;
     }
+
 
     /**
      * Makes a move in a chess game
