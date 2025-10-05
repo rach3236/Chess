@@ -293,5 +293,9 @@ public class ChessGame {
 }
 
 
+//As a note, I accidentally programmed all of Phase 1 in my Chess Exam respos T_T
+// That's why there might be a bunch of copy pastes, but I'll email the TAs to make sure they're aware when they grade it:)
+
+
 
 
