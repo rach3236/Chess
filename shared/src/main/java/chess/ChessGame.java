@@ -177,7 +177,62 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition king_pos = null;
+
+        for (int i=1; i < 9; i++) {
+            for (int j=1; j < 9; j++){
+                ChessPiece piece = board.getPiece(new ChessPosition(i, j));
+                if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
+                    king_pos = new ChessPosition(i, j);
+                }
+            }
+        }
+
+        Collection<ChessMove> king_poss_moves = validMoves(king_pos);
+        Collection<ChessMove> enemy_check_moves = new ArrayList<ChessMove>();
+
+        for (int i=1; i < 9; i++){
+            for (int j=1; j < 9; j++) {
+                ChessPiece piece = board.getPiece(new ChessPosition(i, j));
+                if (piece != null && piece.getTeamColor() != teamColor) {
+                    var temp = validMoves(new ChessPosition(i, j));
+                    for (ChessMove move : temp) {
+                        enemy_check_moves.add(move);
+                    }
+                }
+            }
+        }
+
+        for (ChessMove king_move : king_poss_moves){
+            if (!enemy_check_moves.contains(king_move) && isInCheck(teamColor)) {
+                return false;
+            }
+        }
+
+        //run through, find pieces
+        for (int i=1; i < 9; i++){
+            for (int j=1; j < 9; j++) {
+                ChessPiece piece = board.getPiece(new ChessPosition(i, j));
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    //find valid moves
+                    var my_team_moves = validMoves(new ChessPosition(i, j));
+                    for (ChessMove move : my_team_moves) {
+                        //copy the board
+                        new_board = Copy_Board();
+
+                        //make move
+                        new_board.addPiece(move.getEndPosition(), piece);
+                        new_board.removePiece(move.getStartPosition());
+
+                        //check in check
+                        if (!Check_Helper(teamColor, new_board)){
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return isInCheck(teamColor);
     }
 
     /**
