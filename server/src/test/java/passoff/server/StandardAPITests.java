@@ -83,7 +83,7 @@ public class StandardAPITests {
 
         for (TestUser incompleteLoginRequest : incompleteLoginRequests) {
             TestAuthResult loginResult = serverFacade.login(incompleteLoginRequest);
-
+            System.out.println(loginResult);
             assertHttpBadRequest(loginResult);
             assertAuthFieldsMissing(loginResult);
         }
