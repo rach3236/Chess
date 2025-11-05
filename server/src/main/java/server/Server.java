@@ -24,7 +24,7 @@ public class Server {
         my_server.delete("db", ctx -> ctx.result("{}"));
         my_server.post("user", ctx -> register(ctx));
         my_server.post("session", ctx -> login(ctx));
-
+        my_server.delete("session", ctx -> logout(ctx));
 
     }
 
@@ -79,6 +79,40 @@ public class Server {
         }
 
     }
+
+    //NOTE FOR THE TA: We're just deleting the authtoken, right???
+
+//    Description	Logs out the user represented by the authToken.
+//    URL path	/session
+//    HTTP Method	DELETE
+//    Headers	authorization: <authToken>
+//    Success response	[200] {}
+//    Failure response	[401] { "message": "Error: unauthorized" }
+//    Failure response	[500] { "message": "Error: (description of error)" }
+    private void logout(Context ctx) {
+        var serializer = new Gson();
+        String auth = serializer.fromJson(ctx.body(), String.class);
+
+        try {
+            userService.logout(auth);
+            ctx.status(200);
+        } catch (InvalidAuthTokenException ex) {
+            ctx.status(401).result(serializer.toJson(ex.getMessage()));
+        } catch (Exception ex) {
+            ctx.status(500).result(serializer.toJson(ex.getMessage()));
+        }
+    }
+
+//    Description	Gives a list of all games.
+//    URL path	/game
+//    HTTP Method	GET
+//    Headers	authorization: <authToken>
+//    Success response	[200] { "games": [{"gameID": 1234, "whiteUsername":"", "blackUsername":"", "gameName:""} ]}
+//        Failure response	[401] { "message": "Error: unauthorized" }
+//        Failure response	[500] { "message": "Error: (description of error)" }
+
+
+
 
 
     public int run(int desiredPort) {

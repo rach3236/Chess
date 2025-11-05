@@ -5,8 +5,6 @@ import datamodel.LoginResponse;
 import datamodel.RegisterResponse;
 import datamodel.UserData;
 
-import java.util.Objects;
-
 public class UserService {
     private DataAccess dataAccess;
     private UserData user;
@@ -19,8 +17,10 @@ public class UserService {
             throw new InvalidAccountException("User already exists");
         }
 
-        this.dataAccess.addUser(user);
-        return new RegisterResponse(user.username(), "xyz");
+        //generate auth token
+        String auth = user.username();
+        this.dataAccess.addUser(user, auth);
+        return new RegisterResponse(auth, user.username());
     }
 
     public LoginResponse login(UserData user) throws Exception {
@@ -29,13 +29,19 @@ public class UserService {
         if (existingUser == null) {
             throw new InvalidAccountException("Error: Bad Request");
         }
-
         if (!existingUser.password().equals(user.password())) {
             throw new BadPasswordException("Error: Unauthorized");
         }
-
         return new LoginResponse(user.username(), "xyz");
     }
+
+    public void logout(String auth) throws InvalidAuthTokenException {
+        if (dataAccess.getSessionInfo(auth) == null) {
+            throw new InvalidAuthTokenException("Error: unauthorized");
+        }
+        dataAccess.deleteSessionInfo(auth);
+    }
+
 
     public UserService(){
         this.dataAccess = new MemoryDataAccess();
