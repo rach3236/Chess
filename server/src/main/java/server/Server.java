@@ -2,18 +2,18 @@ package server;
 
 import Service.*;
 import com.google.gson.Gson;
-import datamodel.LoginResponse;
-import datamodel.UserData;
+import datamodel.*;
+import datamodel.Error;
 import io.javalin.*;
 import io.javalin.http.Context;
-import passoff.model.TestResult;
 
-import java.util.Map;
 
 public class Server {
 
     private final Javalin my_server;
     private final UserService userService = new UserService();
+    private final static String AUTHTOKEN = "authorization";
+
 
     public Server() {
         my_server = Javalin.create(config -> config.staticFiles.add("web"));
@@ -25,6 +25,8 @@ public class Server {
         my_server.post("user", ctx -> register(ctx));
         my_server.post("session", ctx -> login(ctx));
         my_server.delete("session", ctx -> logout(ctx));
+        my_server.get("game", ctx -> listGames(ctx));
+        my_server.post("game", ctx -> createGames(ctx));
 
     }
 
@@ -53,6 +55,7 @@ public class Server {
         }
     }
 
+// NOTE FOR THE TA: what's the bad request supposed to be?
 
 //    Description	Logs in an existing user (returns a new authToken).
 //    URL path	/session
@@ -71,11 +74,11 @@ public class Server {
             var response = serializer.toJson(loginResponse);
             ctx.status(200).result(response);
         } catch (InvalidAccountException ex) {
-            ctx.status(400).result(serializer.toJson(ex.getMessage()));
+            ctx.status(400).result(serializer.toJson(new Error(ex.getMessage())));
         } catch (BadPasswordException ex) {
-            ctx.status(401).result(serializer.toJson(ex.getMessage()));
+            ctx.status(401).result(serializer.toJson(new Error(ex.getMessage())));
         }  catch (Exception ex) {
-            ctx.status(500).result(serializer.toJson(ex.getMessage()));
+            ctx.status(500).result(serializer.toJson(new Error(ex.getMessage())));
         }
 
     }
@@ -91,7 +94,7 @@ public class Server {
 //    Failure response	[500] { "message": "Error: (description of error)" }
     private void logout(Context ctx) {
         var serializer = new Gson();
-        String auth = serializer.fromJson(ctx.body(), String.class);
+        String auth = ctx.header(AUTHTOKEN);
 
         try {
             userService.logout(auth);
@@ -103,6 +106,9 @@ public class Server {
         }
     }
 
+
+    // TO DO: Clean up error codes
+
 //    Description	Gives a list of all games.
 //    URL path	/game
 //    HTTP Method	GET
@@ -110,8 +116,46 @@ public class Server {
 //    Success response	[200] { "games": [{"gameID": 1234, "whiteUsername":"", "blackUsername":"", "gameName:""} ]}
 //        Failure response	[401] { "message": "Error: unauthorized" }
 //        Failure response	[500] { "message": "Error: (description of error)" }
+    public void listGames(Context ctx){
+        var serializer = new Gson();
+        String auth = ctx.header(AUTHTOKEN);
+
+        try {
+            var listResponse = userService.listGames(auth);
+            var response = serializer.toJson(new Games(listResponse));
+            ctx.status(200).result(response);
+        } catch (InvalidAuthTokenException ex) {
+            ctx.status(401).result(serializer.toJson(ex.getMessage()));
+        } catch (Exception ex) {
+            ctx.status(500).result(serializer.toJson(ex.getMessage()));
+        }
+    }
 
 
+    // NOTES FOR THE TA: again, what is the bad request supposed to do?
+//    Description	Creates a new game.
+//    URL path	/game
+//    HTTP Method	POST
+//    Headers	authorization: <authToken>
+//    Body	{ "gameName":"" }
+//    Success response	[200] { "gameID": 1234 }
+//    Failure response	[400] { "message": "Error: bad request" }
+//    Failure response	[401] { "message": "Error: unauthorized" }
+//    Failure response	[500] { "message": "Error: (description of error)" }
+    public void createGames(Context ctx) {
+        var serializer = new Gson();
+        String auth = ctx.header(AUTHTOKEN);
+        var gameName = serializer.fromJson(ctx.body(), String.class);
+
+        try {
+            var gameIDResponse = userService.createGame(gameName, auth);
+            ctx.status(200).result(serializer.toJson(new GameID(gameIDResponse)));
+        } catch (InvalidAuthTokenException ex) {
+            ctx.status(401).result(serializer.toJson(new Error(ex.getMessage())));
+        } catch (Exception ex) {
+            ctx.status(500).result(serializer.toJson(new Error(ex.getMessage())));
+        }
+    }
 
 
 
