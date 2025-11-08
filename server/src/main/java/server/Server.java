@@ -74,7 +74,7 @@ public class Server {
             var loginResponse = userService.login(user);
             var response = serializer.toJson(loginResponse);
             ctx.status(200).result(response);
-        } catch (InvalidAccountException ex) {
+        } catch (BadRequestException ex) {
             ctx.status(400).result(serializer.toJson(new Error(ex.getMessage())));
         } catch (BadPasswordException ex) {
             ctx.status(401).result(serializer.toJson(new Error(ex.getMessage())));
@@ -151,6 +151,8 @@ public class Server {
         try {
             var gameIDResponse = userService.createGame(game.gameName(), auth);
             ctx.status(200).result(serializer.toJson(new GameID(gameIDResponse)));
+        } catch (BadRequestException ex) {
+            ctx.status(400).result(serializer.toJson(new Error(ex.getMessage())));
         } catch (InvalidAuthTokenException ex) {
             ctx.status(401).result(serializer.toJson(new Error(ex.getMessage())));
         } catch (Exception ex) {

@@ -15,7 +15,7 @@ public class UserService {
     private int gameID = 0;
 
     public boolean authorized(String auth) {
-        return (dataAccess.isAuthorized(auth));
+        return (dataAccess.getAuth(auth) != null);
     }
 
     public static String generateToken() {
@@ -36,11 +36,11 @@ public class UserService {
         return new RegisterResponse(user.username(), auth);
     }
 
-    public LoginResponse login(UserData user) throws Exception {
+    public LoginResponse login(UserData user) throws InvalidAccountException, BadPasswordException, BadRequestException {
         this.user = user;
         var existingUser = this.dataAccess.getUser(user.username());
-        if (existingUser == null) {
-            throw new InvalidAccountException("Error: Bad Request");
+        if (user.username() == null || user.password() == null || existingUser == null) {
+            throw new BadRequestException("Error: Bad Request");
         }
         if (!existingUser.password().equals(user.password())) {
             throw new BadPasswordException("Error: Unauthorized");
@@ -56,7 +56,6 @@ public class UserService {
         dataAccess.deleteSessionInfo(auth);
     }
 
-
     public ArrayList<GameData> listGames(String auth) throws InvalidAuthTokenException {
 //         validate authToken
         if (!authorized(auth)) {
@@ -66,7 +65,11 @@ public class UserService {
         return games;
     }
 
-    public int createGame(String gameName, String auth) {
+    public int createGame(String gameName, String auth) throws InvalidAuthTokenException, BadRequestException {
+        //bad request check
+        if ((gameName == null) || auth == null) {
+            throw new BadRequestException("Error: field empty");
+        }
         //verify authtoken
         if (!authorized(auth)) {
             throw new InvalidAuthTokenException("Error: unauthorized");

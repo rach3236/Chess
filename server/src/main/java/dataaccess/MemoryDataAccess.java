@@ -40,8 +40,8 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public boolean isAuthorized(String auth) {
-        return authData.containsKey(auth);
+    public String getAuth(String auth) {
+        return authData.get(auth);
     }
 
     // add game data(create game)

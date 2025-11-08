@@ -12,7 +12,7 @@ public interface DataAccess {
     void addUser(UserData user, String auth);
     public UserData getUser(String username);
     public void deleteSessionInfo(String auth);
-    public boolean isAuthorized(String auth);
+    public String getAuth(String auth);
     public GameData getGameInfo(String gameName);
     public GameData addGame(String gameName);
     // will not return a hashmap when we implement
