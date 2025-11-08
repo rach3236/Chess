@@ -3,17 +3,15 @@ package dataaccess;
 import datamodel.GameData;
 import datamodel.UserData;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MemoryDataAccess implements DataAccess {
     //username, userdata
     private final HashMap<String, UserData> users = new HashMap<>();
     // auth, authToken
-    private final HashMap<String, UserData> sessionInfo = new HashMap<>();
+    private final HashMap<String, String> authData = new HashMap<>();
     // game name, game data
     private final HashMap<String, GameData> gameData = new HashMap<>();
     // for game ID
@@ -27,7 +25,7 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public void addUser(UserData user, String auth) {
         users.put(user.username(), user);
-        sessionInfo.put(auth, user);
+        authData.put(auth, user.username());
     }
 
     @Override
@@ -38,22 +36,22 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void deleteSessionInfo(String auth) {
-        sessionInfo.remove(auth);
+        authData.remove(auth);
     }
 
     @Override
-    public UserData getSessionInfo(String auth) {
-        return sessionInfo.get(auth);
+    public boolean isAuthorized(String auth) {
+        return authData.containsKey(auth);
     }
 
     // add game data(create game)
     @Override
-    public int addGame(String gameName){
+    public GameData addGame(String gameName){
         gameID += 1;
         GameData gameInfo = new GameData(gameID, "", "", gameName);
 
         gameData.put(gameName, gameInfo);
-        return gameID;
+        return gameInfo;
     }
 
     // get game info()

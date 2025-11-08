@@ -49,9 +49,10 @@ public class Server {
 
         } //What is the bad request supposed to be? catch (BadRequestException ex) {ctx.status(400).result(ex.getMessage());}
         catch (InvalidAccountException ex){
-            ctx.status(403).result(ex.getMessage());
+            var serial = serializer.toJson(new Error(ex.getMessage()));
+            ctx.status(403).result(serializer.toJson(new Error(ex.getMessage())));
         } catch (Exception ex) {
-            ctx.status(500).result(ex.getMessage());
+            ctx.status(500).result(serializer.toJson(new Error(ex.getMessage())));
         }
     }
 
@@ -80,10 +81,10 @@ public class Server {
         }  catch (Exception ex) {
             ctx.status(500).result(serializer.toJson(new Error(ex.getMessage())));
         }
-
     }
 
     //NOTE FOR THE TA: We're just deleting the authtoken, right???
+    //Deleting the authdata
 
 //    Description	Logs out the user represented by the authToken.
 //    URL path	/session
@@ -100,12 +101,11 @@ public class Server {
             userService.logout(auth);
             ctx.status(200);
         } catch (InvalidAuthTokenException ex) {
-            ctx.status(401).result(serializer.toJson(ex.getMessage()));
+            ctx.status(401).result(serializer.toJson(new Error(ex.getMessage())));
         } catch (Exception ex) {
-            ctx.status(500).result(serializer.toJson(ex.getMessage()));
+            ctx.status(500).result(serializer.toJson(new Error(ex.getMessage())));
         }
     }
-
 
     // TO DO: Clean up error codes
 
@@ -125,14 +125,14 @@ public class Server {
             var response = serializer.toJson(new Games(listResponse));
             ctx.status(200).result(response);
         } catch (InvalidAuthTokenException ex) {
-            ctx.status(401).result(serializer.toJson(ex.getMessage()));
+            ctx.status(401).result(serializer.toJson(serializer.toJson(new Error(ex.getMessage()))));
         } catch (Exception ex) {
-            ctx.status(500).result(serializer.toJson(ex.getMessage()));
+            ctx.status(500).result(serializer.toJson(serializer.toJson(new Error(ex.getMessage()))));
         }
     }
 
-
     // NOTES FOR THE TA: again, what is the bad request supposed to do?
+    // it's for when the wrong thing (or null thing) is passed in
 //    Description	Creates a new game.
 //    URL path	/game
 //    HTTP Method	POST
@@ -145,10 +145,11 @@ public class Server {
     public void createGames(Context ctx) {
         var serializer = new Gson();
         String auth = ctx.header(AUTHTOKEN);
-        var gameName = serializer.fromJson(ctx.body(), String.class);
+        var body = ctx.body();
+        var game = serializer.fromJson(body, GameData.class);
 
         try {
-            var gameIDResponse = userService.createGame(gameName, auth);
+            var gameIDResponse = userService.createGame(game.gameName(), auth);
             ctx.status(200).result(serializer.toJson(new GameID(gameIDResponse)));
         } catch (InvalidAuthTokenException ex) {
             ctx.status(401).result(serializer.toJson(new Error(ex.getMessage())));

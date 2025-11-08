@@ -7,6 +7,7 @@ import datamodel.RegisterResponse;
 import datamodel.UserData;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class UserService {
     private DataAccess dataAccess;
@@ -14,7 +15,11 @@ public class UserService {
     private int gameID = 0;
 
     public boolean authorized(String auth) {
-        return (dataAccess.getSessionInfo(auth) != null);
+        return (dataAccess.isAuthorized(auth));
+    }
+
+    public static String generateToken() {
+        return UUID.randomUUID().toString();
     }
 
     public RegisterResponse register(UserData user) throws Exception{
@@ -22,13 +27,13 @@ public class UserService {
         var existingUser = this.dataAccess.getUser(user.username());
         if (existingUser != null) {
             //return the exception that has the code
-            throw new InvalidAccountException("User already exists");
+            throw new InvalidAccountException("Error: User already exists");
         }
 
         //generate auth token
-        String auth = user.username();
+        String auth = generateToken();
         this.dataAccess.addUser(user, auth);
-        return new RegisterResponse(auth, user.username());
+        return new RegisterResponse(user.username(), auth);
     }
 
     public LoginResponse login(UserData user) throws Exception {
@@ -40,7 +45,8 @@ public class UserService {
         if (!existingUser.password().equals(user.password())) {
             throw new BadPasswordException("Error: Unauthorized");
         }
-        return new LoginResponse(user.username(), "xyz");
+        String auth = generateToken();
+        return new LoginResponse(user.username(), auth);
     }
 
     public void logout(String auth) throws InvalidAuthTokenException {
@@ -65,8 +71,8 @@ public class UserService {
         if (!authorized(auth)) {
             throw new InvalidAuthTokenException("Error: unauthorized");
         }
-        int gameID = dataAccess.addGame(gameName);
-        return gameID;
+        GameData gameInfo = dataAccess.addGame(gameName);
+        return gameInfo.gameID();
     }
 
 
