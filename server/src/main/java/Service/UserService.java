@@ -26,7 +26,7 @@ public class UserService {
     public RegisterResponse register(UserData user) throws InvalidAccountException, BadRequestException{
         this.user = user;
         var existingUser = this.dataAccess.getUser(user.username());
-        if (user.username().isEmpty() || user.password().isEmpty() || user.email().isEmpty()) {
+        if (user.username() == null || user.password() == null || user.username().isEmpty() || user.password().isEmpty() || user.email().isEmpty()) {
             throw new BadRequestException("Error: Bad request");
         }
         if (existingUser != null) {
