@@ -1,10 +1,7 @@
 package Service;
 
 import dataaccess.*;
-import datamodel.GameData;
-import datamodel.LoginResponse;
-import datamodel.RegisterResponse;
-import datamodel.UserData;
+import datamodel.*;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -56,13 +53,12 @@ public class UserService {
         dataAccess.deleteSessionInfo(auth);
     }
 
-    public ArrayList<GameData> listGames(String auth) throws InvalidAuthTokenException {
+    public Games listGames(String auth) throws InvalidAuthTokenException {
 //         validate authToken
         if (!authorized(auth)) {
             throw new InvalidAuthTokenException("Error: unauthorized");
         }
-        var games = dataAccess.getAllGames();
-        return games;
+        return dataAccess.getAllGames();
     }
 
     public int createGame(String gameName, String auth) throws InvalidAuthTokenException, BadRequestException {
@@ -78,6 +74,43 @@ public class UserService {
         return gameInfo.gameID();
     }
 
+    public void joinGame(String auth, PlayerInfo playerInfo) throws InvalidAuthTokenException, BadRequestException, InvalidAccountException {
+        // bad request
+        if (playerInfo.playerColor() == null || playerInfo.gameID() <= 0) {
+            throw new BadRequestException("Error: Empty field");
+        } else if (!playerInfo.playerColor().equals("WHITE") && !playerInfo.playerColor().equals("BLACK")) {
+            throw new InvalidAccountException("Error: already taken");
+        }
+        // authorize token
+        if (!authorized(auth)) {
+            throw new InvalidAuthTokenException("Error: Unauthorized");
+        }
+        // if team color already taken
+        var gameInfo = dataAccess.getGameInfo(playerInfo.gameID());
+        if ((playerInfo.playerColor().equals("WHITE") && !gameInfo.whiteUsername().isBlank()) || (playerInfo.playerColor().equals("BLACK") && !gameInfo.blackUsername().isBlank())) {
+            throw new InvalidAccountException("Error: Already taken");
+        }
+
+        //get username
+        var playerUsername = dataAccess.getUsername(auth);
+        String whiteUsername = null;
+        String blackUsername = null;
+
+        //match tried color and update username
+        if (playerInfo.playerColor().equals("WHITE")) {
+            whiteUsername = playerUsername;
+            blackUsername = gameInfo.blackUsername();
+        }
+        if (playerInfo.playerColor().equals("BLACK")) {
+            blackUsername = playerUsername;
+            whiteUsername = gameInfo.whiteUsername();
+        }
+        String gameName = gameInfo.gameName();
+
+        //update gameData w/ new playerInfo
+        dataAccess.updateGameData(playerInfo.gameID(), whiteUsername, blackUsername, gameName);
+
+    }
 
     public UserService(){
         this.dataAccess = new MemoryDataAccess();

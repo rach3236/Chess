@@ -22,11 +22,12 @@ public class Server {
 
         //since the db doesn't exist yet this will help the tests
         my_server.delete("db", ctx -> ctx.result("{}"));
-        my_server.post("user", ctx -> register(ctx));
-        my_server.post("session", ctx -> login(ctx));
-        my_server.delete("session", ctx -> logout(ctx));
-        my_server.get("game", ctx -> listGames(ctx));
-        my_server.post("game", ctx -> createGames(ctx));
+        my_server.post("user", this::register);
+        my_server.post("session", this::login);
+        my_server.delete("session", this::logout);
+        my_server.get("game", this::listGames);
+        my_server.post("game", this::createGames);
+        my_server.put("game", this::joinGame);
 
     }
 
@@ -75,6 +76,7 @@ public class Server {
             var response = serializer.toJson(loginResponse);
             ctx.status(200).result(response);
         } catch (BadRequestException ex) {
+
             ctx.status(400).result(serializer.toJson(new Error(ex.getMessage())));
         } catch (BadPasswordException ex) {
             ctx.status(401).result(serializer.toJson(new Error(ex.getMessage())));
@@ -122,7 +124,7 @@ public class Server {
 
         try {
             var listResponse = userService.listGames(auth);
-            var response = serializer.toJson(new Games(listResponse));
+            var response = serializer.toJson(listResponse);
             ctx.status(200).result(response);
         } catch (InvalidAuthTokenException ex) {
             ctx.status(401).result(serializer.toJson(serializer.toJson(new Error(ex.getMessage()))));
@@ -159,6 +161,36 @@ public class Server {
             ctx.status(500).result(serializer.toJson(new Error(ex.getMessage())));
         }
     }
+
+//    Description	Verifies that the specified game exists and adds the caller as the requested color to the game.
+//    URL path	/game
+//    HTTP Method	PUT
+//    Headers	authorization: <authToken>
+//    Body	{ "playerColor":"WHITE/BLACK", "gameID": 1234 }
+//    Success response	[200] {}
+//    Failure response	[400] { "message": "Error: bad request" }
+//    Failure response	[401] { "message": "Error: unauthorized" }
+//    Failure response	[403] { "message": "Error: already taken" }
+//    Failure response	[500] { "message": "Error: (description of error)" }
+    public void joinGame(Context ctx) {
+        var serializer = new Gson();
+        String auth = ctx.header(AUTHTOKEN);
+        var playerInfo = serializer.fromJson(ctx.body(), PlayerInfo.class);
+
+        try {
+            userService.joinGame(auth, playerInfo);
+            ctx.status(200);
+        } catch (BadRequestException ex) {
+            ctx.status(400).result(serializer.toJson(new Error(ex.getMessage())));
+        } catch (InvalidAuthTokenException ex) {
+            ctx.status(401).result(serializer.toJson(new Error(ex.getMessage())));
+        } catch (InvalidAccountException ex) {
+            ctx.status(403).result(serializer.toJson(new Error(ex.getMessage())));
+        } catch (Exception ex) {
+            ctx.status(500).result(serializer.toJson(new Error(ex.getMessage())));
+        }
+    }
+
 
 
 

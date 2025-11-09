@@ -1,6 +1,7 @@
 package dataaccess;
 
 import datamodel.GameData;
+import datamodel.Games;
 import datamodel.UserData;
 
 import java.util.ArrayList;
@@ -11,11 +12,13 @@ public interface DataAccess {
     // insert user
     void addUser(UserData user, String auth);
     public UserData getUser(String username);
+    public String getUsername(String auth);
     public void deleteSessionInfo(String auth);
     public String getAuth(String auth);
-    public GameData getGameInfo(String gameName);
+    public GameData getGameInfo(Integer gameID);
     public GameData addGame(String gameName);
     // will not return a hashmap when we implement
-    public ArrayList<GameData> getAllGames();
+    public Games getAllGames();
+    public void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName);
 
 }
