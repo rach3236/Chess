@@ -28,7 +28,12 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public void addUser(UserData user, String auth) {
         users.put(user.username(), user);
-        authData.put(auth, user.username());
+        addSession(auth, user.username());
+    }
+
+    @Override
+    public void addSession(String auth, String username) {
+        authData.put(auth, username);
     }
 
     @Override
@@ -49,6 +54,7 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public String getAuth(String auth) {
         return authData.get(auth);
+
     }
 
     // add game data(create game)

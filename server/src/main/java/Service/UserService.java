@@ -23,9 +23,12 @@ public class UserService {
         dataAccess.delete();
     }
 
-    public RegisterResponse register(UserData user) throws Exception{
+    public RegisterResponse register(UserData user) throws InvalidAccountException, BadRequestException{
         this.user = user;
         var existingUser = this.dataAccess.getUser(user.username());
+        if (user.username().isEmpty() || user.password().isEmpty() || user.email().isEmpty()) {
+            throw new BadRequestException("Error: Bad request");
+        }
         if (existingUser != null) {
             //return the exception that has the code
             throw new InvalidAccountException("Error: User already exists");
@@ -40,13 +43,14 @@ public class UserService {
     public LoginResponse login(UserData user) throws InvalidAccountException, BadPasswordException, BadRequestException {
         this.user = user;
         var existingUser = this.dataAccess.getUser(user.username());
-        if (user.username() == null || user.password() == null || existingUser == null) {
+        if (user.username() == null || user.password() == null) {
             throw new BadRequestException("Error: Bad Request");
         }
-        if (!existingUser.password().equals(user.password())) {
-            throw new BadPasswordException("Error: Unauthorized");
+        if (existingUser == null || !existingUser.password().equals(user.password())) {
+            throw new InvalidAccountException("Error: Unauthorized");
         }
         String auth = generateToken();
+        dataAccess.addSession(auth, user.username());
         return new LoginResponse(user.username(), auth);
     }
 

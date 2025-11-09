@@ -61,7 +61,8 @@ public class Server {
             var response = serializer.toJson(registrationResponse);
             ctx.status(200).result(response);
 
-        } //What is the bad request supposed to be? catch (BadRequestException ex) {ctx.status(400).result(ex.getMessage());}
+        } //What is the bad request supposed to be?
+        catch (BadRequestException ex) {ctx.status(400).result(serializer.toJson(new Error(ex.getMessage())));}
         catch (InvalidAccountException ex){
             var serial = serializer.toJson(new Error(ex.getMessage()));
             ctx.status(403).result(serializer.toJson(new Error(ex.getMessage())));
@@ -89,9 +90,8 @@ public class Server {
             var response = serializer.toJson(loginResponse);
             ctx.status(200).result(response);
         } catch (BadRequestException ex) {
-
             ctx.status(400).result(serializer.toJson(new Error(ex.getMessage())));
-        } catch (BadPasswordException ex) {
+        } catch (InvalidAccountException ex) {
             ctx.status(401).result(serializer.toJson(new Error(ex.getMessage())));
         }  catch (Exception ex) {
             ctx.status(500).result(serializer.toJson(new Error(ex.getMessage())));
@@ -140,9 +140,9 @@ public class Server {
             var response = serializer.toJson(listResponse);
             ctx.status(200).result(response);
         } catch (InvalidAuthTokenException ex) {
-            ctx.status(401).result(serializer.toJson(serializer.toJson(new Error(ex.getMessage()))));
+            ctx.status(401).result(serializer.toJson(new Error(ex.getMessage())));
         } catch (Exception ex) {
-            ctx.status(500).result(serializer.toJson(serializer.toJson(new Error(ex.getMessage()))));
+            ctx.status(500).result(serializer.toJson(new Error(ex.getMessage())));
         }
     }
 

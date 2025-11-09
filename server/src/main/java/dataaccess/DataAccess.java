@@ -11,6 +11,7 @@ public interface DataAccess {
     public void delete();
     // insert user
     void addUser(UserData user, String auth);
+    void addSession(String auth, String username);
     public UserData getUser(String username);
     public String getUsername(String auth);
     public void deleteSessionInfo(String auth);
