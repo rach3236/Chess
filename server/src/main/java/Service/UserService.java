@@ -19,6 +19,10 @@ public class UserService {
         return UUID.randomUUID().toString();
     }
 
+    public void delete() {
+        dataAccess.delete();
+    }
+
     public RegisterResponse register(UserData user) throws Exception{
         this.user = user;
         var existingUser = this.dataAccess.getUser(user.username());

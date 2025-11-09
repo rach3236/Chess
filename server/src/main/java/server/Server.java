@@ -18,10 +18,8 @@ public class Server {
     public Server() {
         my_server = Javalin.create(config -> config.staticFiles.add("web"));
 
-        // Register your endpoints and exception handlers here.
-
-        //since the db doesn't exist yet this will help the tests
-        my_server.delete("db", ctx -> ctx.result("{}"));
+        //handle endpoints here
+        my_server.delete("db", this::clear);
         my_server.post("user", this::register);
         my_server.post("session", this::login);
         my_server.delete("session", this::logout);
@@ -29,6 +27,21 @@ public class Server {
         my_server.post("game", this::createGames);
         my_server.put("game", this::joinGame);
 
+    }
+
+//    Description	Clears the database. Removes all users, games, and authTokens.
+//    URL path	/db
+//    HTTP Method	DELETE
+//    Success response	[200] {}
+//    Failure response	[500] { "message": "Error: (description of error)" }
+    public void clear(Context ctx) {
+        var serializer = new Gson();
+
+        try {
+            userService.delete();
+        } catch (Exception ex){
+            ctx.status(500).result(serializer.toJson(new Error(ex.getMessage())));
+        }
     }
 
 //    Description	Register a new user.
