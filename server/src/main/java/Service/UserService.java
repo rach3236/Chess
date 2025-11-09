@@ -87,7 +87,7 @@ public class UserService {
         }
         // if team color already taken
         var gameInfo = dataAccess.getGameInfo(playerInfo.gameID());
-        if ((playerInfo.playerColor().equals("WHITE") && !gameInfo.whiteUsername().isBlank()) || (playerInfo.playerColor().equals("BLACK") && !gameInfo.blackUsername().isBlank())) {
+        if ((playerInfo.playerColor().equals("WHITE") && gameInfo.whiteUsername() != null || (playerInfo.playerColor().equals("BLACK") && gameInfo.blackUsername() != null))) {
             throw new InvalidAccountException("Error: Already taken");
         }
 
