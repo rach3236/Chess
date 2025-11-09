@@ -84,10 +84,10 @@ public class UserService {
 
     public void joinGame(String auth, PlayerInfo playerInfo) throws InvalidAuthTokenException, BadRequestException, InvalidAccountException {
         // bad request
-        if (playerInfo.playerColor() == null || playerInfo.gameID() <= 0) {
+        if (playerInfo.playerColor() == null || playerInfo.playerColor().isEmpty() || playerInfo.gameID() <= 0) {
             throw new BadRequestException("Error: Empty field");
         } else if (!playerInfo.playerColor().equals("WHITE") && !playerInfo.playerColor().equals("BLACK")) {
-            throw new InvalidAccountException("Error: already taken");
+            throw new BadRequestException("Error: Bad request");
         }
         // authorize token
         if (!authorized(auth)) {
