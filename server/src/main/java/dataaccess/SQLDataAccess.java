@@ -142,7 +142,10 @@ public class SQLDataAccess implements DataAccess {
 
     @Override
     public void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName){
-//        GameData game1 = new GameData(gameID, whiteUsername, blackUsername, gameName);
-//        gameData.put(gameID, game1);
+        try {
+            DatabaseManager.updateGameData(gameID, whiteUsername, blackUsername, gameName);
+        } catch (Exception e) {
+            //TO DO
+        }
     }
 }

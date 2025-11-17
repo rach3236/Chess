@@ -279,7 +279,34 @@ public class DatabaseManager {
         return new GameData[0];
     }
 
+    public static void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName) throws Exception {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "UPDATE gameData" +
+                    "SET whiteUserDataID = (SELECT UserDataID FROM UserData WHERE Username=?)," +
+                    "blackUserDataID = (SELECT UserDataID FROM UserData WHERE Username=?), " +
+                    "gameName=?, " +
+                    "WHERE gameID=?;";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, whiteUsername);
+                ps.setString(2, blackUsername);
+                ps.setString(3, gameName);
+                ps.setInt(4, gameID);
+                ps.executeUpdate();
+            } catch (Exception e) {
+                //TO DO
+            }
+        } catch (Exception e) {
+            throw new Exception("wrong");
+//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+        }
+    }
 
+
+
+
+
+
+// READ DATA
     private static UserData readUser(ResultSet rs) throws SQLException {
         var username = rs.getString("username");
         var password = rs.getString("password");
