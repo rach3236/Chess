@@ -19,7 +19,7 @@ public class SQLDataAccess implements DataAccess {
 //    // game ID, game data
 //    private final HashMap<Integer, GameData> gameData = new HashMap<>();
 //    // for game ID
-//    private int gameID = 0;
+    private int gameID = 0;
 
     //constructor
     //TO DO: remove throw exception!!! (Handle the exception)
@@ -28,7 +28,7 @@ public class SQLDataAccess implements DataAccess {
         try {
             createDatabase();
         } catch (Exception ex) {
-
+            //TO DO
         }
     }
 
@@ -67,54 +67,76 @@ public class SQLDataAccess implements DataAccess {
             UserData userInfo = DatabaseManager.getUserInfo(username);
             return userInfo;
         } catch (Exception e) {
+            //TO DO
         }
-//        return users.get(username);
         return null;
     }
 
     @Override
     public String getUsername(String auth) {
-//        return authData.get(auth);
-        return "";
+        try {
+            return DatabaseManager.getUsernameFromAuth(auth);
+        } catch (Exception e) {
+
+        }
+        return null;
     }
 
     @Override
     public void deleteSessionInfo(String auth) {
-//        authData.remove(auth);
+        try {
+            DatabaseManager.deleteAuthData(auth);
+        } catch (Exception ex) {
+            //TO DO
+        }
     }
 
     @Override
-    public String getAuth(String auth) {
+    public boolean isAuth(String auth) {
+        try {
+            return DatabaseManager.isAuthorized(auth);
+        } catch (Exception e_) {
+            //TO DO
+        }
 //        return authData.get(auth);
-        return "";
+        return false;
     }
 
     // add game data(create game)
     @Override
-    public GameData addGame(String gameName){
-//        gameID += 1;
-//        GameData gameInfo = new GameData(gameID, null, null, gameName);
-//
-//        gameData.put(gameID, gameInfo);
-//        return gameInfo;
-        return null;
+    public int addGame(String gameName){
+        try {
+            return DatabaseManager.addGameData(gameName);
+        } catch (Exception e) {
+            //TO DO
+        }
+        return -1;
     }
 
     // get game info()
     @Override
     public GameData getGameInfo(Integer gameID) {
-//        return gameData.get(gameID);
+        try {
+            return DatabaseManager.getGameInfo(gameID);
+        } catch (Exception e) {
+            //TO DO
+        }
         return null;
     }
 
 
     @Override
     public Games getAllGames() {
-//        Games gameList = new Games(new ArrayList<>());
-//        for (Map.Entry<Integer, GameData> entry : gameData.entrySet()) {
-//            gameList.games().add(entry.getValue());
-//        }
-//        return gameList;
+        try {
+            Games gameList = new Games(new ArrayList<>());
+            GameData[] allGameData = DatabaseManager.getAllGameInfo();
+            for (GameData entry : allGameData) {
+                gameList.games().add(entry);
+            }
+            return gameList;
+        } catch (Exception e) {
+            //TO DO
+        }
         return null;
     }
 

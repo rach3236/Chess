@@ -12,7 +12,7 @@ public class UserService {
     private int gameID = 0;
 
     public boolean authorized(String auth) {
-        return (dataAccess.getAuth(auth) != null);
+        return (dataAccess.isAuth(auth));
     }
 
     public static String generateToken() {
@@ -78,8 +78,7 @@ public class UserService {
         if (!authorized(auth)) {
             throw new InvalidAuthTokenException("Error: unauthorized");
         }
-        GameData gameInfo = dataAccess.addGame(gameName);
-        return gameInfo.gameID();
+        return dataAccess.addGame(gameName);
     }
 
     public void joinGame(String auth, PlayerInfo playerInfo) throws InvalidAuthTokenException, BadRequestException, InvalidAccountException {

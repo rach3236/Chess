@@ -17,9 +17,9 @@ public interface DataAccess {
     public UserData getUser(String username);
     public String getUsername(String auth);
     public void deleteSessionInfo(String auth);
-    public String getAuth(String auth);
+    public boolean isAuth(String auth);
     public GameData getGameInfo(Integer gameID);
-    public GameData addGame(String gameName);
+    public int addGame(String gameName);
     // will not return a hashmap when we implement
     public Games getAllGames();
     public void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName);

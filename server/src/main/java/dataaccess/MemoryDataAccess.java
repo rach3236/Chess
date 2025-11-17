@@ -52,19 +52,19 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public String getAuth(String auth) {
-        return authData.get(auth);
+    public boolean isAuth(String auth) {
+        return (authData.get(auth) != null);
 
     }
 
     // add game data(create game)
     @Override
-    public GameData addGame(String gameName){
+    public int addGame(String gameName){
         gameID += 1;
         GameData gameInfo = new GameData(gameID, null, null, gameName);
 
         gameData.put(gameID, gameInfo);
-        return gameInfo;
+        return gameInfo.gameID();
     }
 
     // get game info()

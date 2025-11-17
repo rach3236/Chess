@@ -1,9 +1,12 @@
 package dataaccess;
 
 import com.google.gson.Gson;
+import datamodel.GameData;
 import datamodel.UserData;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -151,11 +154,145 @@ public class DatabaseManager {
         return null;
     }
 
+    public static String getUsernameFromAuth(String auth) throws Exception {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT username FROM UserData WHERE userDataID=(SELECT userDataID FROM AuthData where authToken=?);";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, auth);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getString("username");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception("wrong");
+//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return null;
+    }
+
+    public static void deleteAuthData(String auth) {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "DELETE FROM AuthData WHERE authToken=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, auth);
+            }
+        } catch (Exception e) {
+            //TO DO
+        }
+    }
+
+    public static boolean isAuthorized(String auth) throws Exception {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM UserData WHERE authToken=?;";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, auth);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception("wrong"); // TO DO
+//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return false;
+    }
+
+    public static int addGameData(String name) throws Exception {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "INSERT INTO GameData (gameName) OUTPUT INSERTED.gameID VALUES (?)";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, name);
+                ResultSet rs = ps.executeQuery();
+                return rs.getInt("gameID");
+            } catch (Exception e) {
+
+            }
+        } catch (Exception e) {
+            throw new Exception("wrong");
+//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return -1;
+    }
+
+    public static GameData getGameInfo(int id) throws Exception {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT " +
+                    "gameData.gameID, " +
+                    "gameData.gameName, " +
+                    "whiteUser.Username AS whiteUsername, " +
+                    "blackUser.Username AS blackUsername, " +
+                    "FROM " +
+                    "    GameData " +
+                    "JOIN " +
+                    "    UserData AS whiteUser ON GameData.whiteUserDataID = whiteUser.UserDataID " +
+                    "JOIN " +
+                    "    UserData AS blackUser ON GameData.blackUserDataID = blackUser.UserDataID " +
+                    "WHERE gameID=?;";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, id);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readGame(rs);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception("wrong");
+//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return null;
+    }
+
+    public static GameData[] getAllGameInfo() throws Exception {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT " +
+                    "gameData.gameID, " +
+                    "gameData.gameName, " +
+                    "whiteUser.Username AS whiteUsername, " +
+                    "blackUser.Username AS blackUsername, " +
+                    "FROM " +
+                    "    GameData " +
+                    "JOIN " +
+                    "    UserData AS whiteUser ON GameData.whiteUserDataID = whiteUser.UserDataID " +
+                    "JOIN " +
+                    "    UserData AS blackUser ON GameData.blackUserDataID = blackUser.UserDataID;";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    ArrayList<GameData> gameData = new ArrayList<GameData>();
+                    while (rs.next()) {
+                        gameData.add(readGame(rs));
+                    }
+                    //TO DO?
+                    return (GameData[]) gameData.toArray();
+                } catch (Exception e) {
+                    //TO DO
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception("wrong");
+//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return new GameData[0];
+    }
+
+
     private static UserData readUser(ResultSet rs) throws SQLException {
         var username = rs.getString("username");
         var password = rs.getString("password");
         var email = rs.getString("email");
         return new UserData(username, password, email);
+    }
+
+    private static GameData readGame(ResultSet rs) throws SQLException {
+        var gameID = rs.getInt("gameID");
+        var whiteUsername = rs.getString("whiteUsername");
+        var blackUsername = rs.getString("blackUsername");
+        var gameName = rs.getString("gameName");
+        return new GameData(gameID, whiteUsername, blackUsername, gameName);
     }
 
     /**
