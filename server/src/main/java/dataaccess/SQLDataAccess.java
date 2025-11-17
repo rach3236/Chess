@@ -32,12 +32,15 @@ public class SQLDataAccess implements DataAccess {
         }
     }
 
+
     @Override
     public void delete() {
-        DatabaseManager.Delete();
-//        users.clear();
-//        authData.clear();
-//        gameData.clear();
+        String command = "DELETE * FROM AuthData;";
+        DatabaseManager.ExecuteSQLCommand(command);
+        command = "DELETE * FROM GameData;";
+        DatabaseManager.ExecuteSQLCommand(command);
+        command = "DELETE * FROM UserData;";
+        DatabaseManager.ExecuteSQLCommand(command);
     }
 
     @Override

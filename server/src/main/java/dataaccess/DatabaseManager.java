@@ -105,9 +105,14 @@ public class DatabaseManager {
     }
 
 
-    // DELETE data values (of everything)
-    public static void Delete() {
+    public static void ExecuteSQLCommand(String command) {
 
+        try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
+             var preparedStatement = conn.prepareStatement(command)) {
+            preparedStatement.executeUpdate();
+        } catch (Exception ex) {
+
+        }
     }
 
     /**
