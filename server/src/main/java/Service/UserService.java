@@ -117,10 +117,10 @@ public class UserService {
 
         //update gameData w/ new playerInfo
         dataAccess.updateGameData(playerInfo.gameID(), whiteUsername, blackUsername, gameName);
-
     }
 
-    public UserService(){
-        this.dataAccess = new MemoryDataAccess();
+    public UserService() {
+//        this.dataAccess = new MemoryDataAccess();
+        this.dataAccess = new SQLDataAccess();
     }
 }

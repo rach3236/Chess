@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public interface DataAccess {
+
+
     public void delete();
     // insert user
     void addUser(UserData user, String auth);

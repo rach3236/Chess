@@ -1,6 +1,7 @@
 package dataaccess;
 
 import java.sql.*;
+import java.util.Objects;
 import java.util.Properties;
 
 public class DatabaseManager {
@@ -19,14 +20,94 @@ public class DatabaseManager {
     /**
      * Creates the database if it does not already exist.
      */
-    static public void createDatabase() throws DataAccessException {
+
+    //TO DO: maybe change password database type
+
+    private static final String[] createUserData = {
+     """
+     CREATE TABLE IF NOT EXISTS  UserData (
+     `userDataID` int NOT NULL AUTO_INCREMENT,
+     `username` varchar(256) NOT NULL,
+     `password` varchar(256) NOT NULL,
+     `email` varchar(256) NOT NULL,
+     PRIMARY KEY (`userDataID`),
+     INDEX(username)
+     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+     """
+     };
+
+    private static final String[] createGameData = {
+            """
+            CREATE TABLE IF NOT EXISTS  GameData (
+              `gameID` int NOT NULL AUTO_INCREMENT,
+              `whiteUserDataID` INT NOT NULL,
+              `blackUserDataID` INT NOT NULL,
+              `gameName` varchar(256) NOT NULL,
+              PRIMARY KEY (`gameID`),
+              INDEX(gameName)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+    };
+
+    private static final String[] createAuthData = {
+            """
+            CREATE TABLE IF NOT EXISTS  AuthData (
+              `authDataID` int NOT NULL AUTO_INCREMENT,
+              `authToken` varchar(256) NOT NULL,
+              `userDataID` INT NOT NULL,
+              PRIMARY KEY (`authDataID`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+    };
+
+    // TO DO: add table creation scripts
+    static public void createDatabase() throws DataAccessException, SQLException {
         var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
         try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
              var preparedStatement = conn.prepareStatement(statement)) {
             preparedStatement.executeUpdate();
+
+            var preparedStatement1 = conn.prepareStatement("USE " + databaseName + ";");
+                preparedStatement1.executeUpdate();
+
+                //TO DO: clean up errors, convert database to call sql commands
+
+            for (String tableScript : createUserData) {
+                try {
+                    var preparedStatement2 = conn.prepareStatement(tableScript);
+                    preparedStatement2.executeUpdate();
+                } catch (SQLException ex) {
+                    throw new DataAccessException("failed to create user data table", ex);
+                }
+            }
+
+            for (String tableScript : createGameData) {
+                try {
+                    var preparedStatement2 = conn.prepareStatement(tableScript);
+                    preparedStatement2.executeUpdate();
+                } catch (SQLException ex) {
+                    throw new DataAccessException("failed to create game data table", ex);
+                }
+            }
+
+            for (String tableScript : createAuthData) {
+                try {
+                    var preparedStatement2 = conn.prepareStatement(tableScript);
+                    preparedStatement2.executeUpdate();
+                } catch (SQLException ex) {
+                    throw new DataAccessException("failed to create authorization data table", ex);
+                }
+            }
+
         } catch (SQLException ex) {
             throw new DataAccessException("failed to create database", ex);
         }
+    }
+
+
+    // DELETE data values (of everything)
+    public static void Delete() {
+
     }
 
     /**
