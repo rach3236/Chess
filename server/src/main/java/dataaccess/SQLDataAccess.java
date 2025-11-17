@@ -45,17 +45,29 @@ public class SQLDataAccess implements DataAccess {
 
     @Override
     public void addUser(UserData user, String auth) {
-//        users.put(user.username(), user);
-//        addSession(auth, user.username());
+        String addCommand = "INSERT INTO UserData (username, password, email) VALUES (" + user.username() + ", " + user.password() + ", " + user.email() + ");";
+        DatabaseManager.ExecuteSQLCommand(addCommand);
+        addSession(auth, user.username());
     }
 
+    // TO DO: remove quotes if/when we modify to the results thing in petshop
     @Override
     public void addSession(String auth, String username) {
-//        authData.put(auth, username);
+        String getusernameID = "SELECT userDataID FROM UserData WHERE username=\"" + username + "\";";
+        int userID123 = DatabaseManager.getUserID(getusernameID);
+        if (userID123 >= 0) {
+            String addSessionCommand = "INSERT INTO AuthData (authToken, userDataID) VALUES (\"" + auth + "\", " + userID123 + ");";
+            DatabaseManager.ExecuteSQLCommand(addSessionCommand);
+        }
     }
 
     @Override
-    public UserData getUser(String username) {
+    public UserData getUser(String username){
+        try {
+            UserData userInfo = DatabaseManager.getUserInfo(username);
+            return userInfo;
+        } catch (Exception e) {
+        }
 //        return users.get(username);
         return null;
     }

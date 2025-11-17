@@ -1,5 +1,8 @@
 package dataaccess;
 
+import com.google.gson.Gson;
+import datamodel.UserData;
+
 import java.sql.*;
 import java.util.Objects;
 import java.util.Properties;
@@ -113,6 +116,46 @@ public class DatabaseManager {
         } catch (Exception ex) {
 
         }
+    }
+
+    public static int getUserID(String command) {
+
+        try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
+             var preparedStatement = conn.prepareStatement(command)) {
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("userDataID");
+                }
+            }
+        } catch (Exception ex) {
+        }
+        return -1;
+    }
+
+
+    public static UserData getUserInfo(String username) throws Exception {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM UserData WHERE username=?;";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readUser(rs);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception("wrong");
+//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return null;
+    }
+
+    private static UserData readUser(ResultSet rs) throws SQLException {
+        var username = rs.getString("username");
+        var password = rs.getString("password");
+        var email = rs.getString("email");
+        return new UserData(username, password, email);
     }
 
     /**
