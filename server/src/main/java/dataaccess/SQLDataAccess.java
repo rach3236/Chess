@@ -4,6 +4,7 @@ import datamodel.GameData;
 import datamodel.Games;
 import datamodel.UserData;
 import dataaccess.DatabaseManager;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,43 +34,53 @@ public class SQLDataAccess implements DataAccess {
     }
 
 
+    String generateHashPassword(String clearTextPassword) {
+        return BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
+    }
+
     @Override
     public void delete() {
-        String command = "DELETE * FROM AuthData;";
-        DatabaseManager.ExecuteSQLCommand(command);
-        command = "DELETE * FROM GameData;";
-        DatabaseManager.ExecuteSQLCommand(command);
-        command = "DELETE * FROM UserData;";
-        DatabaseManager.ExecuteSQLCommand(command);
+        DatabaseManager.Delete();
     }
 
     @Override
     public void addUser(UserData user, String auth) {
-        String addCommand = "INSERT INTO UserData (username, password, email) VALUES (" + user.username() + ", " + user.password() + ", " + user.email() + ");";
-        DatabaseManager.ExecuteSQLCommand(addCommand);
+        try {
+            DatabaseManager.addUser(user.username(), generateHashPassword(user.password()), user.email());
+        } catch (Exception e) {
+            //TO DO
+        }
         addSession(auth, user.username());
     }
 
     // TO DO: remove quotes if/when we modify to the results thing in petshop
     @Override
     public void addSession(String auth, String username) {
-        String getusernameID = "SELECT userDataID FROM UserData WHERE username=\"" + username + "\";";
-        int userID123 = DatabaseManager.getUserID(getusernameID);
-        if (userID123 >= 0) {
-            String addSessionCommand = "INSERT INTO AuthData (authToken, userDataID) VALUES (\"" + auth + "\", " + userID123 + ");";
-            DatabaseManager.ExecuteSQLCommand(addSessionCommand);
+        try {
+            DatabaseManager.addSession(auth);
+        } catch (Exception e) {
+            // TO DO
         }
     }
 
     @Override
-    public UserData getUser(String username){
+    public boolean userExists(String username) {
         try {
-            UserData userInfo = DatabaseManager.getUserInfo(username);
-            return userInfo;
+            return DatabaseManager.userExists(username);
         } catch (Exception e) {
             //TO DO
         }
-        return null;
+        return false;
+    }
+
+    @Override
+    public boolean validUser(String username, String password){
+        try {
+            return DatabaseManager.isValidUser(username, generateHashPassword(password));
+        } catch (Exception e) {
+            //TO DO
+        }
+        return false;
     }
 
     @Override

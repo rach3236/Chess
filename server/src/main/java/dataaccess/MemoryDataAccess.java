@@ -36,9 +36,16 @@ public class MemoryDataAccess implements DataAccess {
         authData.put(auth, username);
     }
 
+    //TO DO?
     @Override
-    public UserData getUser(String username) {
-        return users.get(username);
+    public boolean userExists(String username) {
+        return false;
+    }
+
+    // TO DO!!!
+    @Override
+    public boolean validUser(String username, String password) {
+        return false;
     }
 
     @Override

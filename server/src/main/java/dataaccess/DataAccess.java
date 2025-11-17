@@ -14,7 +14,8 @@ public interface DataAccess {
     // insert user
     void addUser(UserData user, String auth);
     void addSession(String auth, String username);
-    public UserData getUser(String username);
+    public boolean userExists(String username);
+    public boolean validUser(String username, String password);
     public String getUsername(String auth);
     public void deleteSessionInfo(String auth);
     public boolean isAuth(String auth);

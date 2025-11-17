@@ -110,14 +110,51 @@ public class DatabaseManager {
         }
     }
 
-
-    public static void ExecuteSQLCommand(String command) {
-
-        try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
-             var preparedStatement = conn.prepareStatement(command)) {
-            preparedStatement.executeUpdate();
+    public static void Delete() {
+        try (Connection conn = DatabaseManager.getConnection()) {
+        String command = "DELETE * FROM AuthData;" +
+                "DELETE * FROM GameData;" +
+                "DELETE * FROM UserData;";
+            try (PreparedStatement ps = conn.prepareStatement(command)) {
+                ps.executeUpdate();
+            } catch (Exception e) {
+                //TO DO
+            }
         } catch (Exception ex) {
+            //TO DO
+        }
+    }
 
+    public static void addUser(String username, String password, String email) throws Exception {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "INSERT INTO UserData (username, password, email) VALUES (?, ?, ?);";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
+                ps.setString(2, password);
+                ps.setString(3, email);
+                ps.executeUpdate();
+            } catch (Exception e) {
+
+            }
+        } catch (Exception e) {
+            throw new Exception("wrong");
+            //TO DO
+//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+        }
+    }
+
+    public static void addSession(String auth) throws Exception {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "INSERT INTO AuthData (authToken, userDataID) VALUES (auth, (SELECT username FROM UserData WHERE userDataID=(SELECT userDataID FROM AuthData where authToken=?))";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, auth);
+                ps.executeUpdate();
+            } catch (Exception e) {
+
+            }
+        } catch (Exception e) {
+            throw new Exception("wrong");
+//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
         }
     }
 
@@ -135,15 +172,14 @@ public class DatabaseManager {
         return -1;
     }
 
-
-    public static UserData getUserInfo(String username) throws Exception {
+    public static boolean userExists(String username) throws Exception {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM UserData WHERE username=?;";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        return readUser(rs);
+                        return true;
                     }
                 }
             }
@@ -151,7 +187,26 @@ public class DatabaseManager {
             throw new Exception("wrong");
 //            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
         }
-        return null;
+        return false;
+    }
+
+    public static boolean isValidUser(String username, String password) throws Exception {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM UserData WHERE username=? AND password=?;";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
+                ps.setString(2, password);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception("wrong");
+//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return false;
     }
 
     public static String getUsernameFromAuth(String auth) throws Exception {

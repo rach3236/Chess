@@ -25,13 +25,13 @@ public class UserService {
 
     public RegisterResponse register(UserData user) throws InvalidAccountException, BadRequestException{
         this.user = user;
-        var existingUser = this.dataAccess.getUser(user.username());
         if (user.username() == null || user.password() == null || user.username().isEmpty() || user.password().isEmpty() || user.email().isEmpty()) {
             throw new BadRequestException("Error: Bad request");
         }
-        if (existingUser != null) {
-            //return the exception that has the code
-            throw new InvalidAccountException("Error: User already exists");
+
+        if (this.dataAccess.userExists(user.username())) {
+        //return the exception that has the code
+        throw new InvalidAccountException("Error: User already exists");
         }
 
         //generate auth token
@@ -42,11 +42,11 @@ public class UserService {
 
     public LoginResponse login(UserData user) throws InvalidAccountException, BadPasswordException, BadRequestException {
         this.user = user;
-        var existingUser = this.dataAccess.getUser(user.username());
         if (user.username() == null || user.password() == null) {
             throw new BadRequestException("Error: Bad Request");
         }
-        if (existingUser == null || !existingUser.password().equals(user.password())) {
+
+        if (!this.dataAccess.validUser(user.username(), user.password())) {
             throw new InvalidAccountException("Error: Unauthorized");
         }
         String auth = generateToken();
