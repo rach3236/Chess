@@ -372,23 +372,22 @@ public void upRight(ChessPosition myPosition, Collection<ChessPosition> possPosi
 
         for (ChessPosition pos : possPositions) {
             if (pos.getRow() == 8 && myPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                possibleMoves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.BISHOP));
-                possibleMoves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.ROOK));
-                possibleMoves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.QUEEN));
-                possibleMoves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.KNIGHT));
+                pawnPromotionalMoves(myPosition, pos, possibleMoves);
             } else if (pos.getRow() == 1 && myPiece.getTeamColor() == ChessGame.TeamColor.BLACK) {
-                possibleMoves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.BISHOP));
-                possibleMoves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.ROOK));
-                possibleMoves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.QUEEN));
-                possibleMoves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.KNIGHT));
+                pawnPromotionalMoves(myPosition, pos, possibleMoves);
             } else {
                 possibleMoves.add(new ChessMove(myPosition, pos, null));
             }
         }
-
         return possibleMoves;
     }
 
-
-
+    public void pawnPromotionalMoves(ChessPosition myPosition, ChessPosition pos, Collection<ChessMove> possibleMoves) {
+        possibleMoves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.BISHOP));
+        possibleMoves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.ROOK));
+        possibleMoves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.QUEEN));
+        possibleMoves.add(new ChessMove(myPosition, pos, ChessPiece.PieceType.KNIGHT));
+    }
 }
+
+
