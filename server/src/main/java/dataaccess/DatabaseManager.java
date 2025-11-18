@@ -145,7 +145,8 @@ public class DatabaseManager {
 
     public static void addSession(String auth) throws Exception {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "INSERT INTO AuthData (authToken, userDataID) VALUES (auth, (SELECT username FROM UserData WHERE userDataID=(SELECT userDataID FROM AuthData where authToken=?))";
+            var statement = "INSERT INTO AuthData (authToken, userDataID) VALUES " +
+                    "(auth, (SELECT username FROM UserData WHERE userDataID=(SELECT userDataID FROM AuthData where authToken=?))";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, auth);
                 ps.executeUpdate();
@@ -156,20 +157,6 @@ public class DatabaseManager {
             throw new Exception("wrong");
 //            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
         }
-    }
-
-    public static int getUserID(String command) {
-
-        try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
-             var preparedStatement = conn.prepareStatement(command)) {
-            try (ResultSet rs = preparedStatement.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("userDataID");
-                }
-            }
-        } catch (Exception ex) {
-        }
-        return -1;
     }
 
     public static boolean userExists(String username) throws Exception {
@@ -356,19 +343,7 @@ public class DatabaseManager {
         }
     }
 
-
-
-
-
-
 // READ DATA
-    private static UserData readUser(ResultSet rs) throws SQLException {
-        var username = rs.getString("username");
-        var password = rs.getString("password");
-        var email = rs.getString("email");
-        return new UserData(username, password, email);
-    }
-
     private static GameData readGame(ResultSet rs) throws SQLException {
         var gameID = rs.getInt("gameID");
         var whiteUsername = rs.getString("whiteUsername");
