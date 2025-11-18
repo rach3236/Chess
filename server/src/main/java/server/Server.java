@@ -29,9 +29,6 @@ public class Server {
 
     }
 
-//    Description	Clears the database. Removes all users, games, and authTokens.
-//    URL path	/db
-//    HTTP Method	DELETE
 //    Success response	[200] {}
 //    Failure response	[500] { "message": "Error: (description of error)" }
     public void clear(Context ctx) {
@@ -44,14 +41,7 @@ public class Server {
         }
     }
 
-//    Description	Register a new user.
-//    URL path	/user
-//    HTTP Method	POST
-//    Body	{ "username":"", "password":"", "email":"" }
-//    Success response	[200] { "username":"", "authToken":"" }
-//    Failure response	[400] { "message": "Error: bad request" }
-//    Failure response	[403] { "message": "Error: already taken" }
-//    Failure response	[500] { "message": "Error: (description of error)" }
+//    Register a new user.
     private void register(Context ctx) {
 
         var serializer = new Gson();
@@ -71,16 +61,7 @@ public class Server {
         }
     }
 
-// NOTE FOR THE TA: what's the bad request supposed to be?
-
-//    Description	Logs in an existing user (returns a new authToken).
-//    URL path	/session
-//    HTTP Method	POST
-//    Body	{ "username":"", "password":"" }
-//    Success response	[200] { "username":"", "authToken":"" }
-//    Failure response	[400] { "message": "Error: bad request" }
-//    Failure response	[401] { "message": "Error: unauthorized" }
-//    Failure response	[500] { "message": "Error: (description of error)" }
+//    Logs in an existing user (returns a new authToken)
     private void login(Context ctx){
         var serializer = new Gson();
         var user = serializer.fromJson(ctx.body(), UserData.class);
@@ -98,16 +79,7 @@ public class Server {
         }
     }
 
-    //NOTE FOR THE TA: We're just deleting the authtoken, right???
-    //Deleting the authdata
-
-//    Description	Logs out the user represented by the authToken.
-//    URL path	/session
-//    HTTP Method	DELETE
-//    Headers	authorization: <authToken>
-//    Success response	[200] {}
-//    Failure response	[401] { "message": "Error: unauthorized" }
-//    Failure response	[500] { "message": "Error: (description of error)" }
+//    Logs out the user represented by the authToken
     private void logout(Context ctx) {
         var serializer = new Gson();
         String auth = ctx.header(AUTHTOKEN);
@@ -124,13 +96,7 @@ public class Server {
 
     // TO DO: Clean up error codes
 
-//    Description	Gives a list of all games.
-//    URL path	/game
-//    HTTP Method	GET
-//    Headers	authorization: <authToken>
-//    Success response	[200] { "games": [{"gameID": 1234, "whiteUsername":"", "blackUsername":"", "gameName:""} ]}
-//        Failure response	[401] { "message": "Error: unauthorized" }
-//        Failure response	[500] { "message": "Error: (description of error)" }
+//    Description	Gives a list of all games
     public void listGames(Context ctx){
         var serializer = new Gson();
         String auth = ctx.header(AUTHTOKEN);
@@ -146,17 +112,7 @@ public class Server {
         }
     }
 
-    // NOTES FOR THE TA: again, what is the bad request supposed to do?
-    // it's for when the wrong thing (or null thing) is passed in
 //    Description	Creates a new game.
-//    URL path	/game
-//    HTTP Method	POST
-//    Headers	authorization: <authToken>
-//    Body	{ "gameName":"" }
-//    Success response	[200] { "gameID": 1234 }
-//    Failure response	[400] { "message": "Error: bad request" }
-//    Failure response	[401] { "message": "Error: unauthorized" }
-//    Failure response	[500] { "message": "Error: (description of error)" }
     public void createGames(Context ctx) {
         var serializer = new Gson();
         String auth = ctx.header(AUTHTOKEN);
@@ -175,16 +131,7 @@ public class Server {
         }
     }
 
-//    Description	Verifies that the specified game exists and adds the caller as the requested color to the game.
-//    URL path	/game
-//    HTTP Method	PUT
-//    Headers	authorization: <authToken>
-//    Body	{ "playerColor":"WHITE/BLACK", "gameID": 1234 }
-//    Success response	[200] {}
-//    Failure response	[400] { "message": "Error: bad request" }
-//    Failure response	[401] { "message": "Error: unauthorized" }
-//    Failure response	[403] { "message": "Error: already taken" }
-//    Failure response	[500] { "message": "Error: (description of error)" }
+//Verifies that the specified game exists and adds the caller as the requested color to the game.
     public void joinGame(Context ctx) {
         var serializer = new Gson();
         String auth = ctx.header(AUTHTOKEN);
@@ -203,9 +150,6 @@ public class Server {
             ctx.status(500).result(serializer.toJson(new Error(ex.getMessage())));
         }
     }
-
-
-
 
     public int run(int desiredPort) {
         myServer.start(desiredPort);
