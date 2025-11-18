@@ -267,25 +267,16 @@ public void upRight(ChessPosition myPosition, Collection<ChessPosition> possPosi
     // queen
     // rook + bishop combined!
     public Collection<ChessMove> queenRules(ChessPosition myPosition, ChessBoard board) {
-        Collection<ChessPosition> possPositions = new ArrayList<>();
-
-        myPiece = board.getPiece(myPosition);
-
-        getDiagonalMoves(myPosition, possPositions, board);
-
-        getOrthoganalMoves(myPosition, possPositions, board);
-
-        Collection<ChessMove> possibleMoves = new ArrayList<>();
-        for (ChessPosition pos : possPositions) {
-            possibleMoves.add(new ChessMove(myPosition, pos, null));
-        }
-
-        return possibleMoves;
+        return kingOrQueenRules(myPosition, board);
     }
 
     // king
     // Just like a queen, except no recursion:)
     public Collection<ChessMove> kingRules(ChessPosition myPosition, ChessBoard board) {
+        return kingOrQueenRules(myPosition, board);
+    }
+
+    private Collection<ChessMove> kingOrQueenRules(ChessPosition myPosition, ChessBoard board) {
         Collection<ChessPosition> possPositions = new ArrayList<>();
 
         myPiece = board.getPiece(myPosition);
