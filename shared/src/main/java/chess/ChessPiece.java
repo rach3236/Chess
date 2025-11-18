@@ -55,24 +55,24 @@ public class ChessPiece {
      */
     public static Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
-        Collection<ChessMove> possible_moves = new ArrayList<>();
+        Collection<ChessMove> possibleMoves = new ArrayList<>();
 
         Rulebook rules = new Rulebook();
 
         if (piece.getPieceType() == PieceType.BISHOP){
-            possible_moves = rules.bishop_rules(myPosition, board);
+            possibleMoves = rules.bishopRules(myPosition, board);
         } else if (piece.getPieceType() == PieceType.ROOK) {
-            possible_moves = rules.rook_rules(myPosition, board);
+            possibleMoves = rules.rookRules(myPosition, board);
         } else if (piece.getPieceType() == PieceType.QUEEN) {
-            possible_moves = rules.queen_rules(myPosition, board);
+            possibleMoves = rules.queenRules(myPosition, board);
         } else if (piece.getPieceType() == PieceType.KING) {
-            possible_moves = rules.king_rules(myPosition, board);
+            possibleMoves = rules.kingRules(myPosition, board);
         } else if (piece.getPieceType() == PieceType.KNIGHT) {
-            possible_moves = rules.knight_rules(myPosition, board);
+            possibleMoves = rules.knightRules(myPosition, board);
         } else if (piece.getPieceType() == PieceType.PAWN) {
-            possible_moves = rules.pawn_rules(myPosition, board);
+            possibleMoves = rules.pawnRules(myPosition, board);
         }
-        return possible_moves;
+        return possibleMoves;
     }
 
 

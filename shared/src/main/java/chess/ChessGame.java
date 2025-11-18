@@ -21,7 +21,7 @@ public class ChessGame {
         this.team = TeamColor.WHITE;
     }
 
-    public ChessBoard Copy_Board() {
+    public ChessBoard copyBoard() {
         ChessBoard newBoard = new ChessBoard();
         for (int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
@@ -34,7 +34,7 @@ public class ChessGame {
     }
 
     //helper function to find the king
-    public boolean Check_Helper(TeamColor teamColor, ChessBoard currBoard) {
+    public boolean checkHelper(TeamColor teamColor, ChessBoard currBoard) {
         ChessPosition kingPos = null;
 
         boolean breakout = false;
@@ -58,7 +58,8 @@ public class ChessGame {
                     if (piece.getTeamColor() != teamColor) {
                         var temp = ChessPiece.pieceMoves(currBoard, new ChessPosition(i,j));
                         for (ChessMove move : temp) {
-                            if (kingPos != null && move.getEndPosition().getRow() == kingPos.getRow() && move.getEndPosition().getColumn() == kingPos.getColumn()) {
+                            if (kingPos != null && move.getEndPosition().getRow() == kingPos.getRow()
+                                    && move.getEndPosition().getColumn() == kingPos.getColumn()) {
                                 return true;
                             }
                         }
@@ -110,18 +111,18 @@ public class ChessGame {
 
         ChessPiece piece = board.getPiece(startPosition);
 
-        Collection<ChessMove> for_sure_valid = new ArrayList<ChessMove>();
+        Collection<ChessMove> forSureValid = new ArrayList<ChessMove>();
         for (ChessMove move : validMoves) {
-            newBoard = Copy_Board();
+            newBoard = copyBoard();
 
             newBoard.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
             newBoard.removePiece(move.getStartPosition());
 
-            if (!Check_Helper(piece.getTeamColor(), newBoard)) {
-                for_sure_valid.add(move);
+            if (!checkHelper(piece.getTeamColor(), newBoard)) {
+                forSureValid.add(move);
             }
         }
-        return for_sure_valid;
+        return forSureValid;
     }
 
 
@@ -168,7 +169,7 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingPos = null;
 
-        return Check_Helper(teamColor, board);
+        return checkHelper(teamColor, board);
     }
     /**
      * Determines if the given team is in checkmate
@@ -189,7 +190,7 @@ public class ChessGame {
         }
 
         Collection<ChessMove> kingPosMoves = validMoves(kingPos);
-        Collection<ChessMove> enemy_check_moves = new ArrayList<ChessMove>();
+        Collection<ChessMove> enemyCheckMoves = new ArrayList<ChessMove>();
 
         for (int i=1; i < 9; i++){
             for (int j=1; j < 9; j++) {
@@ -197,14 +198,14 @@ public class ChessGame {
                 if (piece != null && piece.getTeamColor() != teamColor) {
                     var temp = validMoves(new ChessPosition(i, j));
                     for (ChessMove move : temp) {
-                        enemy_check_moves.add(move);
+                        enemyCheckMoves.add(move);
                     }
                 }
             }
         }
 
         for (ChessMove kingMove : kingPosMoves){
-            if (!enemy_check_moves.contains(kingMove) && isInCheck(teamColor)) {
+            if (!enemyCheckMoves.contains(kingMove) && isInCheck(teamColor)) {
                 return false;
             }
         }
@@ -215,17 +216,17 @@ public class ChessGame {
                 ChessPiece piece = board.getPiece(new ChessPosition(i, j));
                 if (piece != null && piece.getTeamColor() == teamColor) {
                     //find valid moves
-                    var my_team_moves = validMoves(new ChessPosition(i, j));
-                    for (ChessMove move : my_team_moves) {
+                    var myTeamMoves = validMoves(new ChessPosition(i, j));
+                    for (ChessMove move : myTeamMoves) {
                         //copy the board
-                        newBoard = Copy_Board();
+                        newBoard = copyBoard();
 
                         //make move
                         newBoard.addPiece(move.getEndPosition(), piece);
                         newBoard.removePiece(move.getStartPosition());
 
                         //check in check
-                        if (!Check_Helper(teamColor, newBoard)){
+                        if (!checkHelper(teamColor, newBoard)){
                             return false;
                         }
                     }

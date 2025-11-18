@@ -31,10 +31,6 @@ public class ChessMove {
     /**
      * @return ChessPosition of ending location
      */
-    // math is your friend
-    //there's some obvious recursion right there
-    // are there better ways?
-    // where do we put these rules? do we have a subclass? or are they part of the chess piece? (object oriented, classes that represent the rules for each piece)
     public ChessPosition getEndPosition() {
         return endPosition;
     }
@@ -59,7 +55,9 @@ public class ChessMove {
         if (!(o instanceof ChessMove chessMove)) {
             return false;
         }
-        return Objects.equals(startPosition, chessMove.startPosition) && Objects.equals(endPosition, chessMove.endPosition) && promotionPiece == chessMove.promotionPiece;
+        return Objects.equals(startPosition, chessMove.startPosition)
+                && Objects.equals(endPosition, chessMove.endPosition)
+                && promotionPiece == chessMove.promotionPiece;
     }
 
     @Override

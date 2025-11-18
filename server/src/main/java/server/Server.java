@@ -1,6 +1,6 @@
 package server;
 
-import Service.*;
+import service.*;
 import com.google.gson.Gson;
 import datamodel.*;
 import datamodel.Error;
@@ -10,22 +10,22 @@ import io.javalin.http.Context;
 
 public class Server {
 
-    private final Javalin my_server;
+    private final Javalin myServer;
     private final UserService userService = new UserService();
     private final static String AUTHTOKEN = "authorization";
 
 
     public Server() {
-        my_server = Javalin.create(config -> config.staticFiles.add("web"));
+        myServer = Javalin.create(config -> config.staticFiles.add("web"));
 
         //handle endpoints here
-        my_server.delete("db", this::clear);
-        my_server.post("user", this::register);
-        my_server.post("session", this::login);
-        my_server.delete("session", this::logout);
-        my_server.get("game", this::listGames);
-        my_server.post("game", this::createGames);
-        my_server.put("game", this::joinGame);
+        myServer.delete("db", this::clear);
+        myServer.post("user", this::register);
+        myServer.post("session", this::login);
+        myServer.delete("session", this::logout);
+        myServer.get("game", this::listGames);
+        myServer.post("game", this::createGames);
+        myServer.put("game", this::joinGame);
 
     }
 
@@ -208,11 +208,11 @@ public class Server {
 
 
     public int run(int desiredPort) {
-        my_server.start(desiredPort);
-        return my_server.port();
+        myServer.start(desiredPort);
+        return myServer.port();
     }
 
     public void stop() {
-        my_server.stop();
+        myServer.stop();
     }
 }

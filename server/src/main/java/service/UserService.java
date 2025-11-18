@@ -1,9 +1,8 @@
-package Service;
+package service;
 
 import dataaccess.*;
 import datamodel.*;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 public class UserService {
@@ -25,7 +24,8 @@ public class UserService {
 
     public RegisterResponse register(UserData user) throws InvalidAccountException, BadRequestException{
         this.user = user;
-        if (user.username() == null || user.password() == null || user.username().isEmpty() || user.password().isEmpty() || user.email().isEmpty()) {
+        if (user.username() == null || user.password() == null || user.username().isEmpty() ||
+                user.password().isEmpty() || user.email().isEmpty()) {
             throw new BadRequestException("Error: Bad request");
         }
 
@@ -94,7 +94,8 @@ public class UserService {
         }
         // if team color already taken
         var gameInfo = dataAccess.getGameInfo(playerInfo.gameID());
-        if ((playerInfo.playerColor().equals("WHITE") && gameInfo.whiteUsername() != null || (playerInfo.playerColor().equals("BLACK") && gameInfo.blackUsername() != null))) {
+        if ((playerInfo.playerColor().equals("WHITE") && gameInfo.whiteUsername() != null
+                || (playerInfo.playerColor().equals("BLACK") && gameInfo.blackUsername() != null))) {
             throw new InvalidAccountException("Error: Already taken");
         }
 
