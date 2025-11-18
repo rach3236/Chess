@@ -29,7 +29,7 @@ public class DatabaseManager {
 
     //TO DO: maybe change password database type
 
-    private static final String[] createUserData = {
+    private static final String[] CREATE_USER_DATA = {
      """
      CREATE TABLE IF NOT EXISTS  UserData (
      `userDataID` int NOT NULL AUTO_INCREMENT,
@@ -42,7 +42,7 @@ public class DatabaseManager {
      """
      };
 
-    private static final String[] createGameData = {
+    private static final String[] CREATE_GAME_DATA = {
             """
             CREATE TABLE IF NOT EXISTS  GameData (
               `gameID` int NOT NULL AUTO_INCREMENT,
@@ -55,7 +55,7 @@ public class DatabaseManager {
             """
     };
 
-    private static final String[] createAuthData = {
+    private static final String[] CREATE_AUTH_DATA = {
             """
             CREATE TABLE IF NOT EXISTS  AuthData (
               `authDataID` int NOT NULL AUTO_INCREMENT,
@@ -78,7 +78,7 @@ public class DatabaseManager {
 
                 //TO DO: clean up errors, convert database to call sql commands
 
-            for (String tableScript : createUserData) {
+            for (String tableScript : CREATE_USER_DATA) {
                 try {
                     var preparedStatement2 = conn.prepareStatement(tableScript);
                     preparedStatement2.executeUpdate();
@@ -87,7 +87,7 @@ public class DatabaseManager {
                 }
             }
 
-            for (String tableScript : createGameData) {
+            for (String tableScript : CREATE_GAME_DATA) {
                 try {
                     var preparedStatement2 = conn.prepareStatement(tableScript);
                     preparedStatement2.executeUpdate();
@@ -96,7 +96,7 @@ public class DatabaseManager {
                 }
             }
 
-            for (String tableScript : createAuthData) {
+            for (String tableScript : CREATE_AUTH_DATA) {
                 try {
                     var preparedStatement2 = conn.prepareStatement(tableScript);
                     preparedStatement2.executeUpdate();
@@ -110,7 +110,7 @@ public class DatabaseManager {
         }
     }
 
-    public static void Delete() {
+    public static void delete() {
         try (Connection conn = DatabaseManager.getConnection()) {
         String command = "DELETE * FROM AuthData;" +
                 "DELETE * FROM GameData;" +

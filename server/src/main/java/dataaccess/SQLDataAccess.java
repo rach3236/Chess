@@ -40,7 +40,7 @@ public class SQLDataAccess implements DataAccess {
 
     @Override
     public void delete() {
-        DatabaseManager.Delete();
+        DatabaseManager.delete();
     }
 
     @Override
