@@ -22,10 +22,6 @@ public class Rulebook {
 
         return (myPiece.getTeamColor() != piece.getTeamColor());
     }
-    private boolean teamPiece(ChessPosition newPosition, ChessBoard board){
-        ChessPiece piece = board.getPiece(newPosition);
-        return (myPiece.getTeamColor() == piece.getTeamColor());
-    }
     private boolean ifKing() {
         return (myPiece.getPieceType() == ChessPiece.PieceType.KING);
     }
