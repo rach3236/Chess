@@ -185,6 +185,22 @@ public void upRight(ChessPosition myPosition, Collection<ChessPosition> possPosi
         return;
     }
 
+    public void getOrthoganalMoves(ChessPosition myPosition, Collection<ChessPosition> possPositions, ChessBoard board) {
+
+        straightUp(myPosition, possPositions, board);
+        straightDown(myPosition, possPositions, board);
+        straightLeft(myPosition, possPositions, board);
+        straightRight(myPosition, possPositions, board);
+    }
+
+    public void getDiagonalMoves(ChessPosition myPosition, Collection<ChessPosition> possPositions, ChessBoard board) {
+
+        upRight(myPosition, possPositions, board);
+        upLeft(myPosition, possPositions, board);
+        downRight(myPosition, possPositions, board);
+        downLeft(myPosition, possPositions, board);
+    }
+
     public void knightMoves(ChessPosition myPosition, Collection<ChessPosition> possPositions, ChessBoard board){
         //1
         ChessPosition newPos = new ChessPosition(myPosition.getRow()+2, myPosition.getColumn()+1);
@@ -223,10 +239,7 @@ public void upRight(ChessPosition myPosition, Collection<ChessPosition> possPosi
         // base condition, if the next square isn't empty/isn't on the board
 
         //go up and to the right
-        upRight(myPosition, possPositions, board);
-        upLeft(myPosition, possPositions, board);
-        downRight(myPosition, possPositions, board);
-        downLeft(myPosition, possPositions, board);
+        getDiagonalMoves(myPosition, possPositions, board);
 
         Collection<ChessMove> possibleMoves = new ArrayList<>();
         for (ChessPosition pos : possPositions) {
@@ -244,10 +257,7 @@ public void upRight(ChessPosition myPosition, Collection<ChessPosition> possPosi
         myPiece = board.getPiece(myPosition);
 
         //go straight up, down, left, right
-        straightUp(myPosition, possPositions, board);
-        straightDown(myPosition, possPositions, board);
-        straightLeft(myPosition, possPositions, board);
-        straightRight(myPosition, possPositions, board);
+        getOrthoganalMoves(myPosition, possPositions, board);
 
         Collection<ChessMove> possibleMoves = new ArrayList<>();
         for (ChessPosition pos : possPositions) {
@@ -265,15 +275,9 @@ public void upRight(ChessPosition myPosition, Collection<ChessPosition> possPosi
 
         myPiece = board.getPiece(myPosition);
 
-        upRight(myPosition, possPositions, board);
-        upLeft(myPosition, possPositions, board);
-        downRight(myPosition, possPositions, board);
-        downLeft(myPosition, possPositions, board);
+        getDiagonalMoves(myPosition, possPositions, board);
 
-        straightUp(myPosition, possPositions, board);
-        straightDown(myPosition, possPositions, board);
-        straightLeft(myPosition, possPositions, board);
-        straightRight(myPosition, possPositions, board);
+        getOrthoganalMoves(myPosition, possPositions, board);
 
         Collection<ChessMove> possibleMoves = new ArrayList<>();
         for (ChessPosition pos : possPositions) {
@@ -290,15 +294,9 @@ public void upRight(ChessPosition myPosition, Collection<ChessPosition> possPosi
 
         myPiece = board.getPiece(myPosition);
 
-        straightUp(myPosition, possPositions, board);
-        straightDown(myPosition, possPositions, board);
-        straightLeft(myPosition, possPositions, board);
-        straightRight(myPosition, possPositions, board);
+        getDiagonalMoves(myPosition, possPositions, board);
 
-        upRight(myPosition, possPositions, board);
-        upLeft(myPosition, possPositions, board);
-        downRight(myPosition, possPositions, board);
-        downLeft(myPosition, possPositions, board);
+        getOrthoganalMoves(myPosition, possPositions, board);
 
         Collection<ChessMove> possibleMoves = new ArrayList<>();
         for (ChessPosition pos : possPositions) {
@@ -308,7 +306,6 @@ public void upRight(ChessPosition myPosition, Collection<ChessPosition> possPosi
         return possibleMoves;
     }
 
-
     //knight
     public Collection<ChessMove> knightRules(ChessPosition myPosition, ChessBoard board) {
         Collection<ChessPosition> possPositions = new ArrayList<>();
@@ -316,7 +313,6 @@ public void upRight(ChessPosition myPosition, Collection<ChessPosition> possPosi
         myPiece = board.getPiece(myPosition);
 
         knightMoves(myPosition, possPositions, board);
-
 
         Collection<ChessMove> possibleMoves = new ArrayList<>();
         for (ChessPosition pos : possPositions) {
@@ -354,18 +350,12 @@ public void upRight(ChessPosition myPosition, Collection<ChessPosition> possPosi
             ChessPosition enemyPos2 = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()-1);
             if (inBounds(enemyPos2)){
                 if (!checkSquare(enemyPos2, board)) {
-
                     if (enemyPiece(enemyPos2, board)) {
                           possPositions.add(enemyPos2);
                     }
                 }
             }
-
-
-
-
         }
-
 
         if (myPiece.getTeamColor() == ChessGame.TeamColor.BLACK) {
 
@@ -389,10 +379,7 @@ public void upRight(ChessPosition myPosition, Collection<ChessPosition> possPosi
                         possPositions.add(enemyPos2);
                     }
                 }
-
-
             }
-
         }
 
 
