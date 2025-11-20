@@ -36,15 +36,17 @@ public class MemoryDataAccess implements DataAccess {
         authData.put(auth, username);
     }
 
-    //TO DO?
     @Override
     public boolean userExists(String username) {
-        return false;
+        return users.containsKey(username);
     }
 
     // TO DO!!!
     @Override
     public boolean validUser(String username, String password) {
+        if (users.containsKey(username)) {
+            return users.get(username).password().equals(password);
+        }
         return false;
     }
 
