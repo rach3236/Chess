@@ -194,26 +194,6 @@ public class DatabaseManager {
         return false;
     }
 
-//    public static boolean isValidUser(String username, String password) throws Exception {
-//        try (Connection conn = DatabaseManager.getConnection()) {
-//            var statement = "SELECT * FROM UserData WHERE username=? AND password=?;";
-//            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-//                ps.setString(1, username);
-//                ps.setString(2, password);
-//                try (ResultSet rs = ps.executeQuery()) {
-//                    if (rs.next()) {
-//                        return true;
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            throw new Exception("wrong");
-////            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
-//        }
-//        return false;
-//    }
-
-
     public static UserData getUser(String username) throws Exception {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM UserData WHERE username=?;";
@@ -232,7 +212,6 @@ public class DatabaseManager {
 //            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
         }
         return null;
-
     }
 
     public static String getUsernameFromAuth(String auth) throws Exception {

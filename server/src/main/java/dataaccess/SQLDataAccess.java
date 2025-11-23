@@ -81,11 +81,11 @@ public class SQLDataAccess implements DataAccess {
 //    }
 
     @Override
-    public boolean validUser(String username, String provided_password){
+    public boolean validUser(String username, String providedPassword){
         try {
             var userInfo = DatabaseManager.getUser(username);
             if (userInfo == null) { return false;}
-            return BCrypt.checkpw(provided_password, userInfo.password());
+            return BCrypt.checkpw(providedPassword, userInfo.password());
         } catch (Exception e) {
             //TO DO
         }

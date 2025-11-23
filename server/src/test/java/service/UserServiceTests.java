@@ -32,7 +32,7 @@ public class UserServiceTests {
     }
 
     @BeforeEach
-    void set_up() {
+    void setUp() {
         service.delete();
     }
 
@@ -41,9 +41,9 @@ public class UserServiceTests {
     @DisplayName("Delete Test")
     public void deleteTest() {
 
-        RegisterResponse user_auth_info = service.register(user1);
+        RegisterResponse userAuthInfo = service.register(user1);
 
-        service.createGame("game1", user_auth_info.authToken());
+        service.createGame("game1", userAuthInfo.authToken());
 
         service.delete();
 
@@ -52,11 +52,11 @@ public class UserServiceTests {
         });
 
         assertThrows(InvalidAuthTokenException.class, () -> {
-            service.logout(user_auth_info.authToken());
+            service.logout(userAuthInfo.authToken());
         });
 
         assertThrows(InvalidAuthTokenException.class, () -> {
-            service.listGames(user_auth_info.authToken());
+            service.listGames(userAuthInfo.authToken());
         });
     }
 
@@ -64,23 +64,23 @@ public class UserServiceTests {
     @Order(2)
     @DisplayName("Register Fails")
     public void registerFail() {
-        UserData bad_user1 = new UserData(null, "pass", "mail");
-        UserData bad_user2 = new UserData("smth", null, "mail");
-        UserData bad_user3 = new UserData("smth", "pass", null);
+        UserData badUser1 = new UserData(null, "pass", "mail");
+        UserData badUser2 = new UserData("smth", null, "mail");
+        UserData badUser3 = new UserData("smth", "pass", null);
 
         // Assert no username
         assertThrows(BadRequestException.class, () -> {
-            service.register(bad_user1);
+            service.register(badUser1);
         }, "~~~Null username worked and it shouldn't have~~~");
 
         // Assert no password
         assertThrows(BadRequestException.class, () -> {
-            service.register(bad_user2);
+            service.register(badUser2);
         }, "~~~Null password worked and it shouldn't have~~~");
 
         // Assert no email
         assertThrows(BadRequestException.class, () -> {
-            service.register(bad_user3);
+            service.register(badUser3);
         }, "~~~Null email worked and it shouldn't have~~~");
     }
 
@@ -88,32 +88,32 @@ public class UserServiceTests {
     @Test
     @Order(3)
     @DisplayName("Register Success")
-    public void register_success() {
+    public void registerSuccess() {
 
-        var register_result = service.register(user1);
-        var expected_register = new RegisterResponse("username", register_result.authToken());
+        var registerResult = service.register(user1);
+        var expectedRegister = new RegisterResponse("username", registerResult.authToken());
 
-;        assertEquals(expected_register, register_result, "Register didn't work you suck lol");
+;        assertEquals(expectedRegister, registerResult, "Register didn't work you suck lol");
     }
 
     @Test
     @Order(4)
     @DisplayName("Login Fail")
-    public void login_fail() {
+    public void loginFail() {
         //register user beforehand
         service.register(user1);
 
-        UserData bad_user1 = new UserData(null, "pass", null);
-        UserData bad_user2 = new UserData("username", null, null);
+        UserData badUser1 = new UserData(null, "pass", null);
+        UserData badUser2 = new UserData("username", null, null);
 
         //test null username
         assertThrows(BadRequestException.class, () -> {
-                    service.login(bad_user1);
+                    service.login(badUser1);
                 }, "Successful login with a null username (bad)");
 
         //test null password
         assertThrows(BadRequestException.class, () -> {
-            service.login(bad_user2);
+            service.login(badUser2);
         }, "Successful login with a null password (bad)");
 
         //test if password doesn't match and still logs in
@@ -128,20 +128,20 @@ public class UserServiceTests {
     @Test
     @Order(5)
     @DisplayName("Login Success")
-    public void login_success() {
+    public void loginSuccess() {
          service.register(user1);
 
-         var login_result = service.login(user1);
-         var expected_login = new LoginResponse(user1.username(), login_result.authToken());
+         var loginResult = service.login(user1);
+         var expected_login = new LoginResponse(user1.username(), loginResult.authToken());
 
-         assertEquals(expected_login, login_result, "Normal Login did not work:(");
+         assertEquals(expected_login, loginResult, "Normal Login did not work:(");
     }
 
     @Test
     @Order(6)
     @DisplayName("Logout Fail!")
-    public void logout_fail() {
-        var regi_response = service.register(user1);
+    public void logoutFail() {
+        var regiResponse = service.register(user1);
 
         assertThrows(InvalidAuthTokenException.class, () -> {
             service.logout("bad auth token hehehe");
@@ -150,24 +150,24 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Logout Success")
-    public void logout_success() {
-        var regi_response = service.register(user1);
+    public void logoutSuccess() {
+        var regiResponse = service.register(user1);
 
-        assertDoesNotThrow(() -> service.logout(regi_response.authToken()), "Couldn't log out properly");
+        assertDoesNotThrow(() -> service.logout(regiResponse.authToken()), "Couldn't log out properly");
     }
 
     @Test
     @DisplayName("Create Game Fail")
-    public void create_fail() {
+    public void createFail() {
         //set up
-        var regi_response = service.register(user1);
+        var regiResponse = service.register(user1);
         //test null game name
         assertThrows(BadRequestException.class, () -> {
-           service.createGame(null, regi_response.authToken());
+           service.createGame(null, regiResponse.authToken());
         });
         //test null auth token
         assertThrows(BadRequestException.class, () -> {
-            service.createGame(null, regi_response.authToken());
+            service.createGame(null, regiResponse.authToken());
         });
         //test bad auth token
         assertThrows(InvalidAuthTokenException.class, () -> {
@@ -179,28 +179,28 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Create Game Success")
-    public void create_success() {
+    public void createSuccess() {
         //set up
-        var regi_response = service.register(user1);
-        var create_response = service.createGame("GAME", regi_response.authToken());
+        var regiResponse = service.register(user1);
+        var createResponse = service.createGame("GAME", regiResponse.authToken());
 
-        Assertions.assertTrue(create_response > 0,  "Could not successfully create game");
+        Assertions.assertTrue(createResponse > 0,  "Could not successfully create game");
     }
 
     @Test
     @DisplayName("List Game Fail")
-    public void list_fail() {
+    public void listFail() {
         // set up
-        var regi_response = service.register(user1);
+        var regiResponse = service.register(user1);
 
         //check empty list games?
         assertThrows(InvalidAuthTokenException.class, () -> {
             service.listGames("badAuth");
         }, "bad auth token (empty list)");
         //make multiple games
-        service.createGame("Game1", regi_response.authToken());
-        service.createGame("Game2", regi_response.authToken());
-        service.createGame("Game3", regi_response.authToken());
+        service.createGame("Game1", regiResponse.authToken());
+        service.createGame("Game2", regiResponse.authToken());
+        service.createGame("Game3", regiResponse.authToken());
 
         //assert
         assertThrows(InvalidAuthTokenException.class, () -> {
@@ -210,7 +210,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("List Game Success")
-    public void list_success() {
+    public void listSuccess() {
         var regiResponse = service.register(user1);
 
         var listGamesResponse = service.listGames(regiResponse.authToken());
@@ -229,7 +229,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Join Game Fail")
-    public void join_fail() {
+    public void joinFail() {
         var regiResponse = service.register(user1);
         var gameID = service.createGame("Game1", regiResponse.authToken());
 
@@ -267,7 +267,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Join Game Success")
-    public void join_success() {
+    public void joinSuccess() {
         //set up
         var regiResponse = service.register(user1);
         var gameID = service.createGame("Game1", regiResponse.authToken());
