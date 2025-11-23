@@ -132,9 +132,9 @@ public class UserServiceTests {
          service.register(user1);
 
          var loginResult = service.login(user1);
-         var expected_login = new LoginResponse(user1.username(), loginResult.authToken());
+         var expectedLogin = new LoginResponse(user1.username(), loginResult.authToken());
 
-         assertEquals(expected_login, loginResult, "Normal Login did not work:(");
+         assertEquals(expectedLogin, loginResult, "Normal Login did not work:(");
     }
 
     @Test
