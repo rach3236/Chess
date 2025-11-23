@@ -10,21 +10,21 @@ public class UserService {
     private UserData user;
     private int gameID = 0;
 
-    public boolean authorized(String auth) {
-        return (dataAccess.isAuth(auth));
-    }
-
-    public static String generateToken() {
-        return UUID.randomUUID().toString();
-    }
-
     public void delete() {
         dataAccess.delete();
     }
 
+    private boolean authorized(String auth) {
+        return (dataAccess.isAuth(auth));
+    }
+
+    private static String generateToken() {
+        return UUID.randomUUID().toString();
+    }
+
     public RegisterResponse register(UserData user) throws InvalidAccountException, BadRequestException{
         this.user = user;
-        if (user.username() == null || user.password() == null || user.username().isEmpty() ||
+        if (user.username() == null || user.password() == null || user.email() == null || user.username().isEmpty() ||
                 user.password().isEmpty() || user.email().isEmpty()) {
             throw new BadRequestException("Error: Bad request");
         }
@@ -40,7 +40,7 @@ public class UserService {
         return new RegisterResponse(user.username(), auth);
     }
 
-    public LoginResponse login(UserData user) throws InvalidAccountException, BadPasswordException, BadRequestException {
+    public LoginResponse login(UserData user) throws InvalidAccountException, BadRequestException {
         this.user = user;
         if (user.username() == null || user.password() == null) {
             throw new BadRequestException("Error: Bad Request");
@@ -120,7 +120,7 @@ public class UserService {
     }
 
     public UserService() {
-//        this.dataAccess = new MemoryDataAccess();
         this.dataAccess = new MemoryDataAccess();
+//        this.dataAccess = new SQLDataAccess();
     }
 }

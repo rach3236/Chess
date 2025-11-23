@@ -47,17 +47,17 @@ public class SQLDataAccess implements DataAccess {
     public void addUser(UserData user, String auth) {
         try {
             DatabaseManager.addUser(user.username(), generateHashPassword(user.password()), user.email());
+            addSession(auth, user.username());
         } catch (Exception e) {
             //TO DO
         }
-        addSession(auth, user.username());
     }
 
     // TO DO: remove quotes if/when we modify to the results thing in petshop
     @Override
     public void addSession(String auth, String username) {
         try {
-            DatabaseManager.addSession(auth);
+            DatabaseManager.addSession(auth, username);
         } catch (Exception e) {
             // TO DO
         }
@@ -73,10 +73,19 @@ public class SQLDataAccess implements DataAccess {
         return false;
     }
 
+//    boolean verifyUser(String username, String providedClearTextPassword) {
+//        // read the previously hashed password from the database
+//        var hashedPassword = readHashedPasswordFromDatabase(username);
+//
+//        return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
+//    }
+
     @Override
-    public boolean validUser(String username, String password){
+    public boolean validUser(String username, String provided_password){
         try {
-            return DatabaseManager.isValidUser(username, generateHashPassword(password));
+            var userInfo = DatabaseManager.getUser(username);
+            if (userInfo == null) { return false;}
+            return BCrypt.checkpw(provided_password, userInfo.password());
         } catch (Exception e) {
             //TO DO
         }
@@ -117,7 +126,8 @@ public class SQLDataAccess implements DataAccess {
     @Override
     public int addGame(String gameName){
         try {
-            return DatabaseManager.addGameData(gameName);
+            var gameID = DatabaseManager.addGameData(gameName);
+            return gameID;
         } catch (Exception e) {
             //TO DO
         }

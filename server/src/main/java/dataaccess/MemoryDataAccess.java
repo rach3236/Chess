@@ -63,7 +63,6 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public boolean isAuth(String auth) {
         return (authData.get(auth) != null);
-
     }
 
     // add game data(create game)
