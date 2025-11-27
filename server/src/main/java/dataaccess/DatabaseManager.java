@@ -1,13 +1,12 @@
 package dataaccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import datamodel.GameData;
 import datamodel.UserData;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Properties;
 
 public class DatabaseManager {
@@ -49,6 +48,7 @@ public class DatabaseManager {
               `whiteUserDataID` INT NULL,
               `blackUserDataID` INT NULL,
               `gameName` varchar(256) NOT NULL,
+              `json` TEXT DEFAULT NULL,
               PRIMARY KEY (`gameID`),
               FOREIGN KEY (whiteUserDataID)
               REFERENCES UserData(userDataID),
@@ -262,11 +262,13 @@ public class DatabaseManager {
         return false;
     }
 
-    public static int addGameData(String name) throws Exception {
+    public static int addGameData(String name, ChessGame gameObject) throws Exception {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "INSERT INTO GameData (gameName, whiteUserDataID, blackUserDataID) VALUES (?, null, null);";
+            var serializer = new Gson();
+            var statement = "INSERT INTO GameData (gameName, whiteUserDataID, blackUserDataID, json) VALUES (?, null, null, ?);";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, name);
+                ps.setString(2, serializer.toJson(gameObject));
                 ps.executeUpdate();
             } catch (Exception e) {
                 //TO DO
@@ -293,7 +295,8 @@ public class DatabaseManager {
                     "GameData.gameID, " +
                     "GameData.gameName, " +
                     "(SELECT Username FROM UserData WHERE userDataID=GameData.whiteUserDataID) AS whiteUsername, " +
-                    "(SELECT Username FROM UserData WHERE userDataID=GameData.blackUserDataID) AS blackUsername " +
+                    "(SELECT Username FROM UserData WHERE userDataID=GameData.blackUserDataID) AS blackUsername, " +
+                    "GameData.json " +
                     "FROM GameData " +
                     "WHERE gameID=?;";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -317,7 +320,8 @@ public class DatabaseManager {
                     "GameData.gameID, " +
                     "GameData.gameName, " +
                     "(SELECT Username FROM UserData WHERE userDataID=GameData.whiteUserDataID) AS whiteUsername, " +
-                    "(SELECT Username FROM UserData WHERE userDataID=GameData.blackUserDataID) AS blackUsername " +
+                    "(SELECT Username FROM UserData WHERE userDataID=GameData.blackUserDataID) AS blackUsername, " +
+                    "GameData.json " +
                     "FROM GameData;";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 try (ResultSet rs = ps.executeQuery()) {
@@ -365,11 +369,14 @@ public class DatabaseManager {
 
 // READ DATA
     private static GameData readGame(ResultSet rs) throws SQLException {
+        var serializer = new Gson();
+
         var gameID = rs.getInt("gameID");
         var whiteUsername = rs.getString("whiteUsername");
         var blackUsername = rs.getString("blackUsername");
         var gameName = rs.getString("gameName");
-        return new GameData(gameID, whiteUsername, blackUsername, gameName);
+        var gameObject = serializer.fromJson(rs.getString("json"), ChessGame.class);
+        return new GameData(gameID, whiteUsername, blackUsername, gameName, gameObject);
     }
 
     private static UserData readUser(ResultSet rs) throws SQLException {

@@ -1,25 +1,17 @@
 package dataaccess;
 
+import chess.ChessGame;
 import datamodel.GameData;
 import datamodel.Games;
 import datamodel.UserData;
-import dataaccess.DatabaseManager;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import static dataaccess.DatabaseManager.createDatabase;
 
 public class SQLDataAccess implements DataAccess {
-//    //username, userdata
-//    private final HashMap<String, UserData> users = new HashMap<>();
-//    // auth, username
-//    private final HashMap<String, String> authData = new HashMap<>();
-//    // game ID, game data
-//    private final HashMap<Integer, GameData> gameData = new HashMap<>();
-//    // for game ID
+
     private int gameID = 0;
 
     //constructor
@@ -53,7 +45,7 @@ public class SQLDataAccess implements DataAccess {
         }
     }
 
-    // TO DO: remove quotes if/when we modify to the results thing in petshop
+    // TO DO: remove quotes if/when we modify to the results thing in pet shop
     @Override
     public void addSession(String auth, String username) {
         try {
@@ -126,8 +118,8 @@ public class SQLDataAccess implements DataAccess {
     @Override
     public int addGame(String gameName){
         try {
-            var gameID = DatabaseManager.addGameData(gameName);
-            return gameID;
+            ChessGame gameObject = new ChessGame();
+            return DatabaseManager.addGameData(gameName, gameObject);
         } catch (Exception e) {
             //TO DO
         }
@@ -168,5 +160,13 @@ public class SQLDataAccess implements DataAccess {
         } catch (Exception e) {
             //TO DO
         }
+    }
+
+    public int getGameID() {
+        return gameID;
+    }
+
+    public void setGameID(int gameID) {
+        this.gameID = gameID;
     }
 }
