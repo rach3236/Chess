@@ -1,6 +1,5 @@
 package service;
 
-
 import chess.ChessGame;
 import dataaccess.MemoryDataAccess;
 import datamodel.*;

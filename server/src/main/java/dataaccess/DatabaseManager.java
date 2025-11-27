@@ -51,9 +51,9 @@ public class DatabaseManager {
               `gameName` varchar(256) NOT NULL,
               PRIMARY KEY (`gameID`),
               FOREIGN KEY (whiteUserDataID)
-              REFERENCES Suppliers(whiteUserDataID)
+              REFERENCES UserData(userDataID),
               FOREIGN KEY (blackUserDataID)
-              REFERENCES Suppliers(blackUserDataID)
+              REFERENCES UserData(userDataID),
               INDEX(gameName)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
@@ -65,7 +65,9 @@ public class DatabaseManager {
               `authDataID` int NOT NULL AUTO_INCREMENT,
               `authToken` varchar(256) NOT NULL,
               `userDataID` INT NOT NULL,
-              PRIMARY KEY (`authDataID`)
+              PRIMARY KEY (`authDataID`),
+              FOREIGN KEY (userDataID)
+              REFERENCES UserData(userDataID)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
     };
@@ -116,12 +118,6 @@ public class DatabaseManager {
 
     public static void delete() {
         try (Connection conn = DatabaseManager.getConnection()) {
-            String command1 = "DELETE FROM UserData;";
-            try (PreparedStatement ps = conn.prepareStatement(command1)) {
-                ps.executeUpdate();
-            } catch (Exception e) {
-                //TO DO
-            }
             String command2 = "DELETE FROM AuthData";
             try (PreparedStatement ps = conn.prepareStatement(command2)) {
                 ps.executeUpdate();
@@ -134,8 +130,12 @@ public class DatabaseManager {
             } catch (Exception e) {
                 //TO DO
             }
-
-
+            String command1 = "DELETE FROM UserData;";
+            try (PreparedStatement ps = conn.prepareStatement(command1)) {
+                ps.executeUpdate();
+            } catch (Exception e) {
+                //TO DO
+            }
         } catch (Exception ex) {
             //TO DO
         }
@@ -264,19 +264,18 @@ public class DatabaseManager {
 
     public static int addGameData(String name) throws Exception {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "INSERT INTO GameData (gameName) VALUES (?);";
+            var statement = "INSERT INTO GameData (gameName, whiteUserDataID, blackUserDataID) VALUES (?, null, null);";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, name);
                 ps.executeUpdate();
             } catch (Exception e) {
                 //TO DO
             }
-            var statement2 = "SELECT LAST_INSERT_ID();";
+            var statement2 = "SELECT LAST_INSERT_ID() AS gameID;";
             try (PreparedStatement ps = conn.prepareStatement(statement2)) {
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
-                    var gameID = rs.getInt("gameID)");
-                    return gameID;
+                    return rs.getInt("gameID");
                 }
             } catch (Exception e) {
                 //TO DO
@@ -291,16 +290,11 @@ public class DatabaseManager {
     public static GameData getGameInfo(int id) throws Exception {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT " +
-                    "gameData.gameID, " +
-                    "gameData.gameName, " +
-                    "whiteUser.Username AS whiteUsername, " +
-                    "blackUser.Username AS blackUsername, " +
-                    "FROM " +
-                    "    GameData " +
-                    "JOIN " +
-                    "    UserData AS whiteUser ON GameData.whiteUserDataID = whiteUser.UserDataID " +
-                    "JOIN " +
-                    "    UserData AS blackUser ON GameData.blackUserDataID = blackUser.UserDataID " +
+                    "GameData.gameID, " +
+                    "GameData.gameName, " +
+                    "(SELECT Username FROM UserData WHERE userDataID=GameData.whiteUserDataID) AS whiteUsername, " +
+                    "(SELECT Username FROM UserData WHERE userDataID=GameData.blackUserDataID) AS blackUsername " +
+                    "FROM GameData " +
                     "WHERE gameID=?;";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, id);
@@ -320,24 +314,19 @@ public class DatabaseManager {
     public static GameData[] getAllGameInfo() throws Exception {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT " +
-                    "gameData.gameID, " +
-                    "gameData.gameName, " +
-                    "whiteUser.Username AS whiteUsername, " +
-                    "blackUser.Username AS blackUsername, " +
-                    "FROM " +
-                    "    GameData " +
-                    "JOIN " +
-                    "    UserData AS whiteUser ON GameData.whiteUserDataID = whiteUser.UserDataID " +
-                    "JOIN " +
-                    "    UserData AS blackUser ON GameData.blackUserDataID = blackUser.UserDataID;";
+                    "GameData.gameID, " +
+                    "GameData.gameName, " +
+                    "(SELECT Username FROM UserData WHERE userDataID=GameData.whiteUserDataID) AS whiteUsername, " +
+                    "(SELECT Username FROM UserData WHERE userDataID=GameData.blackUserDataID) AS blackUsername " +
+                    "FROM GameData;";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 try (ResultSet rs = ps.executeQuery()) {
-                    ArrayList<GameData> gameData = new ArrayList<GameData>();
+                    ArrayList<GameData> GameData = new ArrayList<GameData>();
                     while (rs.next()) {
-                        gameData.add(readGame(rs));
+                        GameData.add(readGame(rs));
                     }
                     //TO DO?
-                    return (GameData[]) gameData.toArray();
+                    return GameData.toArray(new GameData[0]);
                 } catch (Exception e) {
                     //TO DO
                 }
@@ -349,18 +338,21 @@ public class DatabaseManager {
         return new GameData[0];
     }
 
+    private static String addUserCheck(String username) {
+        return username != null? "(SELECT userDataID FROM UserData WHERE Username='" + username + "')" : "Null";
+    }
+
     public static void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName) throws Exception {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "UPDATE gameData" +
-                    "SET whiteUserDataID = (SELECT UserDataID FROM UserData WHERE Username=?)," +
-                    "blackUserDataID = (SELECT UserDataID FROM UserData WHERE Username=?), " +
-                    "gameName=?, " +
+            var statement = "UPDATE GameData " +
+                    "SET whiteUserDataID = " + addUserCheck(whiteUsername)  + " , " +
+                    " blackUserDataID = " + addUserCheck(blackUsername) + " , " +
+                    "gameName=? " +
                     "WHERE gameID=?;";
+
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setString(1, whiteUsername);
-                ps.setString(2, blackUsername);
-                ps.setString(3, gameName);
-                ps.setInt(4, gameID);
+                ps.setString(1, gameName);
+                ps.setInt(2, gameID);
                 ps.executeUpdate();
             } catch (Exception e) {
                 //TO DO

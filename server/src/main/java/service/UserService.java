@@ -120,7 +120,7 @@ public class UserService {
     }
 
     public UserService() {
-        this.dataAccess = new MemoryDataAccess();
-//        this.dataAccess = new SQLDataAccess();
+//        this.dataAccess = new MemoryDataAccess();
+        this.dataAccess = new SQLDataAccess();
     }
 }
