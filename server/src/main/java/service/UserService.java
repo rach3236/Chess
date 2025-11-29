@@ -31,7 +31,7 @@ public class UserService {
 
         if (this.dataAccess.userExists(user.username())) {
         //return the exception that has the code
-        throw new InvalidAccountException("Error: User already exists");
+            throw new InvalidAccountException("Error: User already exists");
         }
 
         //generate auth token

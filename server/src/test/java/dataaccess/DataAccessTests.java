@@ -62,11 +62,6 @@ public class DataAccessTests {
     }
 
 
-//    public void delete();
-//    // insert user
-//    void addUser(UserData user, String auth);
-//    void addSession(String auth, String username);
-//    public boolean userExists(String username);
 //    public boolean validUser(String username, String password);
 //    public String getUsername(String auth);
 //    public void deleteSessionInfo(String auth);
@@ -87,8 +82,6 @@ public class DataAccessTests {
         assertThrows(Exception.class, () -> {
            da.addUser(user1, null);
         });
-
-
     }
 
     @Test
@@ -106,7 +99,139 @@ public class DataAccessTests {
     @DisplayName("Add Session Fail")
     public void addSessionFail() {
 
-//        assert
+        //test bad information
+        assertThrows(InternalServerException.class, () -> {
+           da.addSession(null, user1.username());
+        });
+
+        assertThrows(InternalServerException.class, () -> {
+           da.addSession("auth", null);
+        });
     }
 
+    @Test
+    @DisplayName("Add Session Success")
+    public void addSessionSuccess() {
+        da.addUser(user1, "auth");
+        var sessionResult = da.getUsername("auth");
+        assertNotNull(sessionResult, "Did not successfully add session info");
+    }
+
+    @Test
+    @DisplayName ("User Exists Fails")
+    public void userExistFail() {
+        da.delete();
+        //test no user
+        assertFalse(da.userExists(user1.username()), "Returned true when there's no users");
+        //test that it can return false
+        assertFalse(da.userExists("fake"), "Method said user existed where there was none");
+    }
+
+    @Test
+    @DisplayName("User Exists Works")
+    public void userExistSuccess() {
+        //test that it works when user exists
+        service.register(user1);
+        assertTrue(da.userExists(user1.username()), "Did not return true when user exists");
+    }
+
+    @Test
+    @DisplayName("Valid User Fails")
+    public void validUserFail() {
+        service.register(user1);
+        //test bad password match
+        da.validUser(user1.username(), "bad password");
+        //test bad username
+        assertFalse(da.validUser("bad username", "pass"), "Validated user with bad username and password");
+    }
+
+    @Test
+    @DisplayName("Valid User Success")
+    public void validUserSuccess() {
+        service.register(user1);
+        assertTrue(da.validUser(user1.username(), user1.password()), "Did not validate user successfully");
+    }
+
+    @Test
+    @DisplayName("Get Username Fails")
+    public void getUsernameFails() {
+        //test when there's no data stored
+        var realAuth = UserService.generateToken();
+        assertNull(da.getUsername(realAuth), "Returned a username when there was none stored");
+        //set up
+        var auth = service.register(user1);
+        var getUsernameResult = da.getUsername("bad auth");
+        //test bad auth
+        assertNull(getUsernameResult, "Returned a username with bad auth");
+    }
+
+    @Test
+    @DisplayName("Get Username Success")
+    public void getUsernameSuccess() {
+        //set up
+        var auth = service.register(user1);
+        var getUsernameResult = da.getUsername(auth.authToken());
+        //test it returned the right username
+        assertEquals(user1.username(), getUsernameResult, "Did not get the right username");
+    }
+
+    @Test
+    @DisplayName("Delete Session Fails")
+    public void deleteSessionFail() {
+
+    }
+
+    @Test
+    @DisplayName("Delete Session Success")
+    public void deleteSessionSuccess() {
+
+    }
+
+    @Test
+    @DisplayName("Is Auth Fails")
+    public void isAuthFail() {
+
+    }
+
+    @Test
+    @DisplayName("Is Auth Success")
+    public void isAuthSuccess() {
+
+    }
+
+    @Test
+    @DisplayName("Add Game Fail")
+    public void addGameFail() {
+
+    }
+
+    @Test
+    @DisplayName("Add Game Success")
+    public void addGameSuccess() {
+
+    }
+
+    @Test
+    @DisplayName("Get Game Info Fail")
+    public void getGameFail() {
+
+    }
+
+    @Test
+    @DisplayName("Get Game Info Success")
+    public void getGameSuccess() {
+
+    }
+
+    @Test
+    @DisplayName("Update Game Fail")
+    public void updateGameFail() {
+
+    }
+
+    @Test
+    @DisplayName("Update Game Success")
+    public void updateGameSuccess() {
+
+    }
 }

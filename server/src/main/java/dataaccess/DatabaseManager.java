@@ -177,6 +177,8 @@ public class DatabaseManager {
                     if (rs.next()) {
                         return true;
                     }
+                } catch (Exception e) {
+                    throw new InternalServerException("Error with inputted username", e);
                 }
             }
         } catch (Exception e) {
