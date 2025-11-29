@@ -18,7 +18,7 @@ public class UserService {
         return (dataAccess.isAuth(auth));
     }
 
-    private static String generateToken() {
+    public static String generateToken() {
         return UUID.randomUUID().toString();
     }
 

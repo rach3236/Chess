@@ -61,4 +61,52 @@ public class DataAccessTests {
 
     }
 
+
+//    public void delete();
+//    // insert user
+//    void addUser(UserData user, String auth);
+//    void addSession(String auth, String username);
+//    public boolean userExists(String username);
+//    public boolean validUser(String username, String password);
+//    public String getUsername(String auth);
+//    public void deleteSessionInfo(String auth);
+//    public boolean isAuth(String auth);
+//    public GameData getGameInfo(Integer gameID);
+//    public int addGame(String gameName);
+//    // will not return a hashmap when we implement
+//    public Games getAllGames();
+//    public void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName);
+
+    @Test
+    @DisplayName("Add User Fail")
+    public void addUserFail() {
+
+        //test smth
+        var auth = service.register(user1);
+        //test bad jauth
+        assertThrows(Exception.class, () -> {
+           da.addUser(user1, null);
+        });
+
+
+    }
+
+    @Test
+    @DisplayName("Add User Success")
+    public void addUserSuccess() {
+        var auth = UserService.generateToken();
+        da.addUser(user1, auth);
+
+        var userResult = DatabaseManager.userExists(user1.username());
+
+        assertTrue(userResult, "Didn't add user successfully");
+    }
+
+    @Test
+    @DisplayName("Add Session Fail")
+    public void addSessionFail() {
+
+//        assert
+    }
+
 }
