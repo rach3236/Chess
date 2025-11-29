@@ -178,25 +178,41 @@ public class DataAccessTests {
     @Test
     @DisplayName("Delete Session Fails")
     public void deleteSessionFail() {
+        //test delete w/ bad auth
+        var auth = service.register(user1);
+        da.deleteSessionInfo(auth.authToken() + "bad salt");
+        assertNotNull(da.getUsername(auth.authToken()), "Deleted with bad auth Token");
 
+        //test delete w/ account that doesn't exist
+        var fakeAuth = UserService.generateToken();
+        da.deleteSessionInfo(fakeAuth);
+        assertNotNull(da.getUsername(auth.authToken()), "Deleted wrong session info");
     }
 
     @Test
     @DisplayName("Delete Session Success")
     public void deleteSessionSuccess() {
+        var auth = service.register(user1);
+        da.deleteSessionInfo(auth.authToken());
 
+        assertNull(da.getUsername(auth.authToken()), "Returned something when it was supposed to be deleted");
     }
 
     @Test
     @DisplayName("Is Auth Fails")
     public void isAuthFail() {
-
+        //test when there's no session
+        assertFalse(da.isAuth(UserService.generateToken()), "Authorized when Auth Data is empty");
+        //test with bad authtoken
+        service.register(user1);
+        assertFalse(da.isAuth("bad"), "Authorized with a bad auth");
     }
 
     @Test
     @DisplayName("Is Auth Success")
     public void isAuthSuccess() {
-
+        var auth = service.register(user1);
+        assertTrue(da.isAuth(auth.authToken()), "Didn't authorize when it should have");
     }
 
     @Test
