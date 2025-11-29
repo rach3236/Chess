@@ -1,5 +1,6 @@
 package server;
 
+import dataaccess.InternalServerException;
 import service.*;
 import com.google.gson.Gson;
 import datamodel.*;

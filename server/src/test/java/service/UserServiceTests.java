@@ -8,7 +8,6 @@ import org.junit.jupiter.api.*;
 import passoff.model.*;
 import server.Server;
 
-import java.net.HttpURLConnection;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,7 +20,6 @@ public class UserServiceTests {
 
     @AfterAll
     static void cleanUp(){
-
     }
 
     @BeforeAll

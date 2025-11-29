@@ -26,8 +26,6 @@ public class DatabaseManager {
      * Creates the database if it does not already exist.
      */
 
-    //TO DO: maybe change password database type
-
     private static final String[] CREATE_USER_DATA = {
      """
      CREATE TABLE IF NOT EXISTS  UserData (
@@ -72,8 +70,7 @@ public class DatabaseManager {
             """
     };
 
-    // TO DO: add table creation scripts
-    static public void createDatabase() throws DataAccessException, SQLException {
+    static public void createDatabase() throws DataAccessException {
         var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
         try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
              var preparedStatement = conn.prepareStatement(statement)) {
@@ -81,8 +78,6 @@ public class DatabaseManager {
 
             var preparedStatement1 = conn.prepareStatement("USE " + databaseName + ";");
                 preparedStatement1.executeUpdate();
-
-                //TO DO: clean up errors, convert database to call sql commands
 
             for (String tableScript : CREATE_USER_DATA) {
                 try {
@@ -122,26 +117,26 @@ public class DatabaseManager {
             try (PreparedStatement ps = conn.prepareStatement(command2)) {
                 ps.executeUpdate();
             } catch (Exception e) {
-                //TO DO
+                throw new InternalServerException("Error while deleting auth data", e);
             }
             String command3 = "DELETE FROM GameData";
             try (PreparedStatement ps = conn.prepareStatement(command3)) {
                 ps.executeUpdate();
             } catch (Exception e) {
-                //TO DO
+                throw new InternalServerException("Error while deleting game data", e);
             }
             String command1 = "DELETE FROM UserData;";
             try (PreparedStatement ps = conn.prepareStatement(command1)) {
                 ps.executeUpdate();
             } catch (Exception e) {
-                //TO DO
+                throw new InternalServerException("Error while deleting user data", e);
             }
         } catch (Exception ex) {
-            //TO DO
+            throw new InternalServerException("Error while deleting data", ex);
         }
     }
 
-    public static void addUser(String username, String password, String email) throws Exception {
+    public static void addUser(String username, String password, String email) {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "INSERT INTO UserData (username, password, email) VALUES (?, ?, ?);";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -150,16 +145,14 @@ public class DatabaseManager {
                 ps.setString(3, email);
                 ps.executeUpdate();
             } catch (Exception e) {
-
+                throw new InternalServerException("Error while adding user data", e);
             }
         } catch (Exception e) {
-            throw new Exception("wrong");
-            //TO DO
-//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+            throw new InternalServerException("Error getting a database connection", e);
         }
     }
 
-    public static void addSession(String auth, String username) throws Exception {
+    public static void addSession(String auth, String username) {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "INSERT INTO AuthData (authToken, userDataID) VALUES " +
                     "(?, (SELECT userDataID FROM UserData WHERE username=?))";
@@ -168,15 +161,14 @@ public class DatabaseManager {
                 ps.setString(2, username);
                 ps.executeUpdate();
             } catch (Exception e) {
-            // TO DO
+                throw new InternalServerException("Error while adding game data", e);
             }
         } catch (Exception e) {
-            throw new Exception("wrong");
-//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+            throw new InternalServerException("Error getting database connection", e);
         }
     }
 
-    public static boolean userExists(String username) throws Exception {
+    public static boolean userExists(String username){
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM UserData WHERE username=?;";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -188,13 +180,12 @@ public class DatabaseManager {
                 }
             }
         } catch (Exception e) {
-            throw new Exception("wrong");
-//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+            throw new InternalServerException("Error with the database connection", e);
         }
         return false;
     }
 
-    public static UserData getUser(String username) throws Exception {
+    public static UserData getUser(String username) {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM UserData WHERE username=?;";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -204,17 +195,16 @@ public class DatabaseManager {
                         return readUser(rs);
                     }
                 } catch (Exception e) {
-                    //TO DO
+                    throw new InternalServerException("Error finding user data", e);
                 }
             }
         } catch (Exception e) {
-            throw new Exception("wrong");
-//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+            throw new InternalServerException("Error with database connection", e);
         }
         return null;
     }
 
-    public static String getUsernameFromAuth(String auth) throws Exception {
+    public static String getUsernameFromAuth(String auth) {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT username FROM UserData WHERE userDataID=(SELECT userDataID FROM AuthData where authToken=?);";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -226,8 +216,7 @@ public class DatabaseManager {
                 }
             }
         } catch (Exception e) {
-            throw new Exception("wrong");
-//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+            throw new InternalServerException("Error with database connection", e);
         }
         return null;
     }
@@ -238,13 +227,15 @@ public class DatabaseManager {
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, auth);
                 ps.executeUpdate();
+            } catch (Exception e) {
+                throw new InternalServerException("Error deleting auth data", e);
             }
         } catch (Exception e) {
-            //TO DO
+            throw new InternalServerException("Error with database connection", e);
         }
     }
 
-    public static boolean isAuthorized(String auth) throws Exception {
+    public static boolean isAuthorized(String auth) {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM AuthData WHERE authToken=?;";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -256,13 +247,12 @@ public class DatabaseManager {
                 }
             }
         } catch (Exception e) {
-            throw new Exception("wrong"); // TO DO
-//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+            throw new InternalServerException("Error with connection", e);
         }
         return false;
     }
 
-    public static int addGameData(String name, ChessGame gameObject) throws Exception {
+    public static int addGameData(String name, ChessGame gameObject) {
         try (Connection conn = DatabaseManager.getConnection()) {
             var serializer = new Gson();
             var statement = "INSERT INTO GameData (gameName, whiteUserDataID, blackUserDataID, json) VALUES (?, null, null, ?);";
@@ -271,7 +261,7 @@ public class DatabaseManager {
                 ps.setString(2, serializer.toJson(gameObject));
                 ps.executeUpdate();
             } catch (Exception e) {
-                //TO DO
+                throw new InternalServerException("Error creating the game", e);
             }
             var statement2 = "SELECT LAST_INSERT_ID() AS gameID;";
             try (PreparedStatement ps = conn.prepareStatement(statement2)) {
@@ -280,16 +270,15 @@ public class DatabaseManager {
                     return rs.getInt("gameID");
                 }
             } catch (Exception e) {
-                //TO DO
+                throw new InternalServerException("Error getting game ID", e);
             }
         } catch (Exception e) {
-            throw new Exception("wrong");
-//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+            throw new InternalServerException("Error with database connection", e);
         }
         return -1;
     }
 
-    public static GameData getGameInfo(int id) throws Exception {
+    public static GameData getGameInfo(int id) {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT " +
                     "GameData.gameID, " +
@@ -305,16 +294,17 @@ public class DatabaseManager {
                     if (rs.next()) {
                         return readGame(rs);
                     }
+                } catch (Exception e) {
+                    throw new InternalServerException("Error reading game data", e);
                 }
             }
         } catch (Exception e) {
-            throw new Exception("wrong");
-//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+            throw new InternalServerException("Error with database connection", e);
         }
         return null;
     }
 
-    public static GameData[] getAllGameInfo() throws Exception {
+    public static GameData[] getAllGameInfo() {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT " +
                     "GameData.gameID, " +
@@ -329,24 +319,21 @@ public class DatabaseManager {
                     while (rs.next()) {
                         GameData.add(readGame(rs));
                     }
-                    //TO DO?
                     return GameData.toArray(new GameData[0]);
                 } catch (Exception e) {
-                    //TO DO
+                    throw new InternalServerException("Error listing games", e);
                 }
             }
         } catch (Exception e) {
-            throw new Exception("wrong");
-//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+            throw new InternalServerException("Error with database connection", e);
         }
-        return new GameData[0];
     }
 
     private static String addUserCheck(String username) {
         return username != null? "(SELECT userDataID FROM UserData WHERE Username='" + username + "')" : "Null";
     }
 
-    public static void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName) throws Exception {
+    public static void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName) {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "UPDATE GameData " +
                     "SET whiteUserDataID = " + addUserCheck(whiteUsername)  + " , " +
@@ -359,11 +346,10 @@ public class DatabaseManager {
                 ps.setInt(2, gameID);
                 ps.executeUpdate();
             } catch (Exception e) {
-                //TO DO
+                throw new InternalServerException("Error updating game data to join", e);
             }
         } catch (Exception e) {
-            throw new Exception("wrong");
-//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+            throw new InternalServerException("Error with database connection", e);
         }
     }
 
@@ -376,7 +362,7 @@ public class DatabaseManager {
         var blackUsername = rs.getString("blackUsername");
         var gameName = rs.getString("gameName");
         var gameObject = serializer.fromJson(rs.getString("json"), ChessGame.class);
-        return new GameData(gameID, whiteUsername, blackUsername, gameName, gameObject);
+           return new GameData(gameID, whiteUsername, blackUsername, gameName, gameObject);
     }
 
     private static UserData readUser(ResultSet rs) throws SQLException {
