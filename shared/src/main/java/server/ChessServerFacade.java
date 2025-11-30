@@ -55,6 +55,12 @@ public class ChessServerFacade {
         handleResponse(response, Error.class);
     }
 
+    public void clear() throws ResponseException {
+        var request = buildRequest("DELETE", "/db", null, null);
+        var response = sendRequest(request);
+        handleResponse(response, Error.class);
+    }
+
     private HttpRequest buildRequest(String method, String path, Object body, String authKey) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
