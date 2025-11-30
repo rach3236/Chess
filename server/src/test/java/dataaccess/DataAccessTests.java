@@ -1,16 +1,12 @@
 package dataaccess;
 
 import chess.ChessGame;
-import dataaccess.MemoryDataAccess;
 import datamodel.*;
 import service.InvalidAccountException;
 import service.InvalidAuthTokenException;
 import service.UserService;
 import org.junit.jupiter.api.*;
 import passoff.model.*;
-import server.Server;
-
-import java.net.HttpURLConnection;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -58,19 +54,7 @@ public class DataAccessTests {
         assertThrows(InvalidAuthTokenException.class, () -> {
             service.listGames(authInfo.authToken());
         });
-
     }
-
-
-//    public boolean validUser(String username, String password);
-//    public String getUsername(String auth);
-//    public void deleteSessionInfo(String auth);
-//    public boolean isAuth(String auth);
-//    public GameData getGameInfo(Integer gameID);
-//    public int addGame(String gameName);
-//    // will not return a hashmap when we implement
-//    public Games getAllGames();
-//    public void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName);
 
     @Test
     @DisplayName("Add User Fail")
@@ -98,7 +82,6 @@ public class DataAccessTests {
     @Test
     @DisplayName("Add Session Fail")
     public void addSessionFail() {
-
         //test bad information
         assertThrows(InternalServerException.class, () -> {
            da.addSession(null, user1.username());
