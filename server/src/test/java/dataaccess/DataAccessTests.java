@@ -2,12 +2,8 @@ package dataaccess;
 
 import chess.ChessGame;
 import datamodel.*;
-import service.InvalidAccountException;
-import service.InvalidAuthTokenException;
 import service.UserService;
 import org.junit.jupiter.api.*;
-import passoff.model.*;
-import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 

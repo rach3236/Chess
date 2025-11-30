@@ -4,9 +4,6 @@ import datamodel.GameData;
 import datamodel.Games;
 import datamodel.UserData;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 public interface DataAccess {
 
 

@@ -1,13 +1,18 @@
 import chess.*;
+import datamodel.*;
+import server.ChessServerFacade;
 
-import java.util.Locale;
 import java.util.Scanner;
 
 
 public class Main {
+    private static ChessServerFacade server;
+
     public static void main(String[] args) {
-//        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
-//        System.out.println("♕ 240 Chess Client: " + piece);
+
+        String serverUrl = "http://localhost:8080";
+        server = new ChessServerFacade(serverUrl);
+
         System.out.println("♕ Welcome to 240 Chess. Type Help to get started. ♕");
 
         var helper = new ArgsHelper();
@@ -37,6 +42,7 @@ public class Main {
     }
 
     private static boolean preLoginUI(String[] arguments, ArgsHelper helper) {
+        UserData newUser;
         switch (arguments[0].toLowerCase()) {
             case "help":
                 System.out.println("register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
@@ -44,19 +50,36 @@ public class Main {
                 System.out.println("quit - playing chess");
                 System.out.println("help - with possible commands");
                 break;
+
             case "quit":
                 System.out.println("Goodbye!");
                 //will only return false when user quits
                 return false;
-            case "login":
-                // call user service login!
-                // set log status to equal userService success
-                helper.loggedStatus = true;
-                break;
-            case "register":
-                // call user service register w/ arguments 1, 2, and 3
-                helper.loggedStatus = true;
 
+            case "login":
+                //TO DO: validate arguments!!!
+                newUser = new UserData(arguments[1], arguments[2], null);
+                try {
+                    var loginResponse = server.login(newUser);
+                    helper.authKey = loginResponse.authToken();
+                    helper.loggedStatus = true;
+                } catch (Exception e) {
+                    //TO DO: display user-friendly error message to the user
+                    return true;
+                }
+                break;
+
+            case "register":
+                //TO DO: validate arguments!!!
+                newUser = new UserData(arguments[1], arguments[2], arguments[3]);
+                try {
+                    var registerResponse = server.register(newUser);
+                    helper.authKey = registerResponse.authToken();
+                    helper.loggedStatus = true;
+                } catch (Exception e) {
+                    //TO DO: display user-friendly error message to the user
+                    return true;
+                }
                 break;
 
             default:

@@ -1,7 +1,6 @@
 package dataaccess;
 
 import chess.ChessGame;
-import com.google.protobuf.Internal;
 import datamodel.GameData;
 import datamodel.Games;
 import datamodel.UserData;
