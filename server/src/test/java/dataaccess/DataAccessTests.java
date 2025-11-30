@@ -38,22 +38,16 @@ public class DataAccessTests {
     @DisplayName("Delete Test")
     public void deleteTest() {
         RegisterResponse authInfo = service.register(user1);
+        var emptyResult = da.getAllGames();
         service.createGame("game1", authInfo.authToken());
 
         da.delete();
 
-        //test by calling login
-        assertThrows(InvalidAccountException.class, () -> {
-            service.login(user1);
-        });
+        assertFalse(da.userExists(user1.username()), "Didn't delete all user data");
 
-        assertThrows(InvalidAuthTokenException.class, () -> {
-            service.logout(authInfo.authToken());
-        });
+        assertNull(da.getUsername(authInfo.authToken()), "Didn't delete all auth data");
 
-        assertThrows(InvalidAuthTokenException.class, () -> {
-            service.listGames(authInfo.authToken());
-        });
+        assertEquals(emptyResult, da.getAllGames(), "Didn't delete all game data");
     }
 
     @Test

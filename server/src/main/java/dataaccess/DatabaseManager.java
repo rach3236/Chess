@@ -317,11 +317,11 @@ public class DatabaseManager {
                     "FROM GameData;";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 try (ResultSet rs = ps.executeQuery()) {
-                    ArrayList<GameData> GameData = new ArrayList<GameData>();
+                    ArrayList<GameData> gameData = new ArrayList<>();
                     while (rs.next()) {
-                        GameData.add(readGame(rs));
+                        gameData.add(readGame(rs));
                     }
-                    return GameData.toArray(new GameData[0]);
+                    return gameData.toArray(new GameData[0]);
                 } catch (Exception e) {
                     throw new InternalServerException("Error listing games", e);
                 }
