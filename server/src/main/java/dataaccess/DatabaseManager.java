@@ -332,7 +332,7 @@ public class DatabaseManager {
     }
 
     private static String addUserCheck(String username) {
-        return username != null? "(SELECT userDataID FROM UserData WHERE Username='" + username + "')" : "Null";
+        return username != null ? "(SELECT userDataID FROM UserData WHERE Username='" + username + "')" : "Null";
     }
 
     public static void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName) {

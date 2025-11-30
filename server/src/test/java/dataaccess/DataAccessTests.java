@@ -218,36 +218,71 @@ public class DataAccessTests {
     @Test
     @DisplayName("Add Game Fail")
     public void addGameFail() {
-
+        assertThrows(Exception.class, () -> {
+            da.addGame(null);
+        }, "Added game with bad info");
     }
 
     @Test
     @DisplayName("Add Game Success")
     public void addGameSuccess() {
-
+        var gameId = da.addGame("Normal Game");
+        assertTrue(gameId >0, "Did not properly add game");
     }
 
     @Test
     @DisplayName("Get Game Info Fail")
     public void getGameFail() {
+        assertNull(da.getGameInfo(12), "Returned game info that didn't exist");
 
+        da.addGame("game name");
+        assertNull(da.getGameInfo(-1), "Returned game info with bad game ID");
     }
 
     @Test
     @DisplayName("Get Game Info Success")
     public void getGameSuccess() {
-
+        var gameid = da.addGame("game1");
+        var gameInfoResponse = da.getGameInfo(gameid);
+        assertNotNull(gameInfoResponse, "Did not successfully get game info");
     }
 
     @Test
     @DisplayName("Update Game Fail")
     public void updateGameFail() {
+        da.updateGameData(3, null, null, "fake game");
+        assertNull(da.getGameInfo(3), "Returned information when there was none");
 
+        var gameID = da.addGame("New Game");
+        GameData newGame = new GameData(gameID, null, null,
+                "New Game", new ChessGame());
+
+        //test updating with a bad ID
+        da.updateGameData(44567, null, null, "New Game");
+        var result = da.getGameInfo(gameID);
+        assertEquals(newGame.gameName(), result.gameName(), "Changed username with bad game ID");
     }
 
     @Test
     @DisplayName("Update Game Success")
     public void updateGameSuccess() {
 
+        var auth = service.register(user1);
+
+        var user2 = new UserData("User 2", "pass 2", "email@whatever.com");
+        service.register(user2);
+
+        var gameID = da.addGame("New Game");
+        da.updateGameData(gameID, null, null, "New Game");
+
+        //test white username changing
+        da.updateGameData(gameID, user1.username(), null, "New Game");
+        var result = da.getGameInfo(gameID);
+        assertEquals(user1.username(), result.whiteUsername(), "Did not update white username correctly");
+
+        //test black username change
+        da.updateGameData(gameID, user1.username(), user2.username(), "New Game");
+        var result2 = da.getGameInfo(gameID);
+        assertEquals(user2.username(), result2.blackUsername(), "Did not update black username correctly");
     }
 }
