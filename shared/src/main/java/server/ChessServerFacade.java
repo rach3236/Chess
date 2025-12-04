@@ -3,7 +3,6 @@ package server;
 import com.google.gson.Gson;
 import datamodel.*;
 import datamodel.Error;
-import exception.ResponseException;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -43,19 +42,19 @@ public class ChessServerFacade {
         return handleResponse(response, Games.class);
     }
 
-    public GameID createGame(GameData game, String auth) throws Exception, ResponseException {
+    public GameID createGame(GameData game, String auth) throws Exception {
         var request = buildRequest("POST", "/game", game, auth);
         var response = sendRequest(request);
         return handleResponse(response, GameID.class);
     }
 
-    public void joinPlayer(PlayerInfo player, String auth) throws Exception, ResponseException {
+    public void joinPlayer(PlayerInfo player, String auth) throws Exception {
         var request = buildRequest("PUT", "/game", player, auth);
         var response = sendRequest(request);
         handleResponse(response, Error.class);
     }
 
-    public void clear() throws Exception, ResponseException {
+    public void clear() throws Exception {
         var request = buildRequest("DELETE", "/db", null, null);
         var response = sendRequest(request);
         handleResponse(response, Error.class);
@@ -82,11 +81,11 @@ public class ChessServerFacade {
         }
     }
 
-    private HttpResponse<String> sendRequest(HttpRequest request) throws ResponseException {
+    private HttpResponse<String> sendRequest(HttpRequest request) throws Exception {
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception ex) {
-            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+            throw new Exception();
         }
     }
 
@@ -109,10 +108,10 @@ public class ChessServerFacade {
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
-                throw ResponseException.fromJson(body);
+                throw new Exception();
             }
 
-            throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
+            throw new Exception();
         }
 
         if (responseClass != null) {
