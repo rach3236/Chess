@@ -99,7 +99,8 @@ public class ChessServerFacade {
             case 401:
                 throw new Exception("Oh no! Looks like you're unauthorized for that action.");
             case 403:
-                throw new Exception("Oh no! Looks like the information you've entered is already taken by another user:) \nPlease enter in an unique username and password");
+                throw new Exception("Oh no! Looks like the information you've entered is already taken by another user:) " +
+                        "\nPlease enter in an unique username and password");
             case 500:
                 throw new Exception("Oh no! Looks like we've encountered an error!😬 Please try again later.");
             default:
