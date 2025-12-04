@@ -150,6 +150,7 @@ public class Main {
                     var joinCheckResponse = joinCheck(arguments, listLen);
                     if (joinCheckResponse != null) {
                         System.out.println(joinCheckResponse);
+                        return true;
                     }
                     ind = Integer.parseInt(arguments[1]);
                     PlayerInfo player1 = new PlayerInfo(arguments[2], gameList.get(ind-1).gameID());
@@ -165,14 +166,15 @@ public class Main {
                     var allGamesList = server.listGames(helper.authKey);
                     gameList = allGamesList.games();
                     int listLen = gameList.size();
+
                     var observeCheckResponse = observeCheck(arguments, listLen);
                     if (observeCheckResponse != null) {
                         System.out.println(observeCheckResponse);
                         return true;
                     }
-                    int ind = Integer.parseInt(arguments[1]);
-                    int gameID = gameList.get(ind - 1).gameID();
-                    drawBoard(BLACK);
+//                    int ind = Integer.parseInt(arguments[1]);
+//                    int gameID = gameList.get(ind - 1).gameID();
+                    drawBoard(WHITE);
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                     return true;
@@ -285,12 +287,12 @@ public class Main {
         if (inputs.length < 3) {
             return """
                     Oh no! Looks like we don't have enough the username AND password🤭
-                    Please make sure to format your input like this: 
+                    Please make sure to format your input like this:
                     --->'login <USERNAME> <PASSWORD>'
                     """;
 
         } else if (inputs.length > 3) {
-            return "Oh no! Looks like you put in \\u001B[3m too many" + RESET + "inputs:)" +
+            return "Oh no! Looks like you put in too many" + RESET + "inputs:)" +
                     "\nPlease make sure to format your input like this: " +
                     "\n     'login <USERNAME> <PASSWORD>'";
         }
@@ -303,7 +305,7 @@ public class Main {
                     "\nPlease make sure you format your input like this: " +
                     "\n'register <USERNAME> <PASSWORD> <EMAIL>'";
         } else if (inputs.length > 4) {
-            return "Oh no! Looks like you put in \\u001B[3m too many" + RESET + "inputs:)" +
+            return "Oh no! Looks like you put in too many" + RESET + "inputs:)" +
                     "\nPlease make sure to format your input like this: " +
                     "\n      'register <USERNAME> <PASSWORD> <EMAIL>'";
         }
@@ -317,7 +319,7 @@ public class Main {
                     "\nPlease format your input like this: " +
                     "\n    'create <GAME NAME>'";
         } else if (inputs.length > 2) {
-            return "Oh no! Looks like you have \\u001B[3m too many" + RESET + "inputs:)" +
+            return "Oh no! Looks like you have too many" + RESET + "inputs:)" +
                     "\n Please format your input like this: " +
                     "\n    'create <GAME NAME>'";
         }
@@ -335,7 +337,7 @@ public class Main {
                         'join <ID> [WHITE|BLACK]'
                     """;
         } else if (inputs.length > 3) {
-            return "Oh no! Looks like you have \\u001B[3m too many" + RESET + "inputs:)" +
+            return "Oh no! Looks like you have too many" + RESET + "inputs:)" +
                     "\n Please format your input like this: " +
                     "\n    'join <ID> [WHITE|BLACK]'";
         }
@@ -376,6 +378,10 @@ public class Main {
                     --->'observe <GAME NUMBER>'
                     """;
         }
+        //check game number is valid
+        if (checkGameNumber(inputs, listLen) != null) {
+            return checkGameNumber(inputs, listLen);
+        }
 
         return null;
     }
@@ -392,6 +398,7 @@ public class Main {
                     """);
         }
 
+        ind = Integer.parseInt(inputs[1]);
         if (ind > listLen || ind < 1) {
             return """
                     Oh no! Looks like that game doesn't exist:)
