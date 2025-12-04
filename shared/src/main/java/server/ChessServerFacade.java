@@ -18,7 +18,7 @@ public class ChessServerFacade {
         serverUrl = "http://localhost:" + port;
     }
 
-    public RegisterResponse register(UserData user) throws Exception, ResponseException {
+    public RegisterResponse register(UserData user) throws Exception {
         var request = buildRequest("POST", "/user", user, "");
         var response = sendRequest(request);
         return handleResponse(response, RegisterResponse.class);
@@ -37,7 +37,7 @@ public class ChessServerFacade {
         handleResponse(response, Error.class);
     }
 
-    public Games listGames(String auth) throws Exception, ResponseException {
+    public Games listGames(String auth) throws Exception {
         var request = buildRequest("GET", "/game", null, auth);
         var response = sendRequest(request);
         return handleResponse(response, Games.class);

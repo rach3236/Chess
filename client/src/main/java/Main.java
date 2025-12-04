@@ -56,7 +56,6 @@ public class Main {
         UserData newUser;
         switch (arguments[0].toLowerCase()) {
             case "help":
-                //TO DO: make display messages pretty! (should be diff colors)
                 System.out.println("\u001b[31;mregister <USERNAME> <PASSWORD> <EMAIL> - to create an account");
                 System.out.println("login <USERNAME> <PASSWORD> - to play chess");
                 System.out.println("quit - playing chess");
@@ -117,7 +116,6 @@ public class Main {
                     break;
                 }
                 GameData game = new GameData(0, null, null, arguments[1], null);
-
                 try {
                     server.createGame(game, helper.authKey);
                     System.out.println("Your game is created! Please call 'list' to see the full list of games.");
@@ -128,21 +126,20 @@ public class Main {
                 break;
             case "list":
                 try {
-                    //format games array to be readable
                     var allGamesList = server.listGames(helper.authKey);
                     gameList = allGamesList.games();
                     for (int i = 0; i<gameList.size(); i++) {
                         var currGame = gameList.get(i);
                         String whitePlayer = currGame.whiteUsername()!=null ? currGame.whiteUsername() : " ";
                         String blackPlayer = currGame.blackUsername()!=null ? currGame.blackUsername() : " ";
-                        System.out.println((i+1) +": " + currGame.gameName() + ", White Player: " + whitePlayer + ", Black Player: " + blackPlayer);
+                        System.out.println((i+1) +": " + currGame.gameName() + ", White Player: " +
+                                whitePlayer + ", Black Player: " + blackPlayer);
                     }
                     System.out.println("List length: " + String.valueOf(gameList.size()));
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
                 break;
-
             case "join":
                 try {
                     int ind = 0;
@@ -173,7 +170,6 @@ public class Main {
                         System.out.println(observeCheckResponse);
                         return true;
                     }
-                    //I'll need this later I guess
                     int ind = Integer.parseInt(arguments[1]);
                     int gameID = gameList.get(ind - 1).gameID();
                     drawBoard(BLACK);
@@ -183,7 +179,6 @@ public class Main {
                 }
                 break;
             case "logout":
-                //log the service api as out
                 try {
                     server.logout(helper.authKey);
                     helper.loggedStatus = false;
@@ -196,7 +191,6 @@ public class Main {
                 System.out.println("Goodbye!");
                 return false;
             case "help":
-                //TO DO: make display messages pretty! (should be diff colors)
                 System.out.println("create <NAME> - a game");
                 System.out.println("list - games");
                 System.out.println("join <ID> [WHITE|BLACK] - a game");
@@ -215,63 +209,74 @@ public class Main {
         //default board
         if (colorPOV.equals(WHITE)) {
             System.out.println(BLACKONGRAY + "    a  b  c  d  e  f  g  h    " + RESET);
-            System.out.println(BLACKONGRAY + " 8 " + BLUEONWHITE + " R " + BLUEONBLACK + " N " + BLUEONWHITE + " B " + BLUEONBLACK + " Q " + BLUEONWHITE + " K " + BLUEONBLACK + " B " + BLUEONWHITE + " N " + BLUEONBLACK + " R " + BLACKONGRAY + " 8 " + RESET);
-            System.out.println(BLACKONGRAY + " 7 " + BLUEONBLACK + " P " + BLUEONWHITE + " P " + BLUEONBLACK + " P " + BLUEONWHITE + " P " + BLUEONBLACK + " P " + BLUEONWHITE + " P " + BLUEONBLACK + " P " + BLUEONWHITE + " P " + BLACKONGRAY + " 7 " + RESET);
-            System.out.println(BLACKONGRAY + " 6 " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLACKONGRAY + " 6 " + RESET);
-            System.out.println(BLACKONGRAY + " 5 " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLACKONGRAY + " 5 " + RESET);
-            System.out.println(BLACKONGRAY + " 4 " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLACKONGRAY + " 4 " + RESET);
-            System.out.println(BLACKONGRAY + " 3 " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLACKONGRAY + " 3 " + RESET);
-            System.out.println(BLACKONGRAY + " 2 " + REDONWHITE + " P " + REDONBLACK + " P " + REDONWHITE + " P " + REDONBLACK + " P " + REDONWHITE + " P " + REDONBLACK + " P " + REDONWHITE + " P " + REDONBLACK + " P " + BLACKONGRAY + " 2 " + RESET);
-            System.out.println(BLACKONGRAY + " 1 " + REDONBLACK + " R " + REDONWHITE + " N " + REDONBLACK + " B " + REDONWHITE + " Q " + REDONBLACK + " K " + REDONWHITE + " B " + REDONBLACK + " N " + REDONWHITE + " R " + BLACKONGRAY + " 1 " + RESET);
+            System.out.println(BLACKONGRAY + " 8 " + BLUEONWHITE + " R " + BLUEONBLACK +
+                    " N " + BLUEONWHITE + " B " + BLUEONBLACK + " Q " + BLUEONWHITE +
+                    " K " + BLUEONBLACK + " B " + BLUEONWHITE + " N " + BLUEONBLACK +
+                    " R " + BLACKONGRAY + " 8 " + RESET);
+            System.out.println(BLACKONGRAY + " 7 " + BLUEONBLACK + " P " + BLUEONWHITE +
+                    " P " + BLUEONBLACK + " P " + BLUEONWHITE + " P " + BLUEONBLACK +
+                    " P " + BLUEONWHITE + " P " + BLUEONBLACK + " P " + BLUEONWHITE +
+                    " P " + BLACKONGRAY + " 7 " + RESET);
+            System.out.println(BLACKONGRAY + " 6 " + BLUEONWHITE + "   " + BLUEONBLACK +
+                    "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE +
+                    "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK +
+                    "   " + BLACKONGRAY + " 6 " + RESET);
+            System.out.println(BLACKONGRAY + " 5 " + BLUEONBLACK + "   " + BLUEONWHITE +
+                    "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK +
+                    "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE +
+                    "   " + BLACKONGRAY + " 5 " + RESET);
+            System.out.println(BLACKONGRAY + " 4 " + BLUEONWHITE + "   " + BLUEONBLACK +
+                    "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE +
+                    "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK +
+                    "   " + BLACKONGRAY + " 4 " + RESET);
+            System.out.println(BLACKONGRAY + " 3 " + BLUEONBLACK + "   " + BLUEONWHITE +
+                    "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK +
+                    "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE +
+                    "   " + BLACKONGRAY + " 3 " + RESET);
+            System.out.println(BLACKONGRAY + " 2 " + REDONWHITE + " P " + REDONBLACK +
+                    " P " + REDONWHITE + " P " + REDONBLACK + " P " + REDONWHITE +
+                    " P " + REDONBLACK + " P " + REDONWHITE + " P " + REDONBLACK +
+                    " P " + BLACKONGRAY + " 2 " + RESET);
+            System.out.println(BLACKONGRAY + " 1 " + REDONBLACK + " R " + REDONWHITE +
+                    " N " + REDONBLACK + " B " + REDONWHITE + " Q " + REDONBLACK +
+                    " K " + REDONWHITE + " B " + REDONBLACK + " N " + REDONWHITE +
+                    " R " + BLACKONGRAY + " 1 " + RESET);
             System.out.println(BLACKONGRAY + "    a  b  c  d  e  f  g  h    " + RESET);
         } else if (colorPOV.equals(BLACK)) {
             System.out.println(BLACKONGRAY + "    h  g  f  e  d  c  b  a    " + RESET);
-            System.out.println(BLACKONGRAY + " 1 " + REDONWHITE + " R " + REDONBLACK + " N " + REDONWHITE + " B " + REDONBLACK + " K " + REDONWHITE + " Q " + REDONBLACK + " B " + REDONWHITE + " N " + REDONBLACK + " R " + BLACKONGRAY + " 1 " + RESET);
-            System.out.println(BLACKONGRAY + " 2 " + REDONBLACK + " P " + REDONWHITE + " P " + REDONBLACK + " P " + REDONWHITE + " P " + REDONBLACK + " P " + REDONWHITE + " P " + REDONBLACK + " P " + REDONWHITE + " P " + BLACKONGRAY + " 2 " + RESET);
-            System.out.println(BLACKONGRAY + " 3 " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLACKONGRAY + " 3 " + RESET);
-            System.out.println(BLACKONGRAY + " 4 " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLACKONGRAY + " 4 " + RESET);
-            System.out.println(BLACKONGRAY + " 5 " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLACKONGRAY + " 5 " + RESET);
-            System.out.println(BLACKONGRAY + " 6 " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLACKONGRAY + " 6 " + RESET);
-            System.out.println(BLACKONGRAY + " 7 " + BLUEONWHITE + " P " + BLUEONBLACK + " P " + BLUEONWHITE + " P " + BLUEONBLACK + " P " + BLUEONWHITE + " P " + BLUEONBLACK + " P " + BLUEONWHITE + " P " + BLUEONBLACK + " P " + BLACKONGRAY + " 7 " + RESET);
-            System.out.println(BLACKONGRAY + " 8 " + BLUEONBLACK + " R " + BLUEONWHITE + " N " + BLUEONBLACK + " B " + BLUEONWHITE + " K " + BLUEONBLACK + " Q " + BLUEONWHITE + " B " + BLUEONBLACK + " N " + BLUEONWHITE + " R " + BLACKONGRAY + " 8 " + RESET);
+            System.out.println(BLACKONGRAY + " 1 " + REDONWHITE + " R " + REDONBLACK +
+                    " N " + REDONWHITE + " B " + REDONBLACK + " K " + REDONWHITE +
+                    " Q " + REDONBLACK + " B " + REDONWHITE + " N " + REDONBLACK +
+                    " R " + BLACKONGRAY + " 1 " + RESET);
+            System.out.println(BLACKONGRAY + " 2 " + REDONBLACK + " P " + REDONWHITE +
+                    " P " + REDONBLACK + " P " + REDONWHITE + " P " + REDONBLACK +
+                    " P " + REDONWHITE + " P " + REDONBLACK + " P " + REDONWHITE +
+                    " P " + BLACKONGRAY + " 2 " + RESET);
+            System.out.println(BLACKONGRAY + " 3 " + BLUEONWHITE + "   " + BLUEONBLACK +
+                    "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE +
+                    "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK +
+                    "   " + BLACKONGRAY + " 3 " + RESET);
+            System.out.println(BLACKONGRAY + " 4 " + BLUEONBLACK + "   " + BLUEONWHITE +
+                    "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK +
+                    "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE +
+                    "   " + BLACKONGRAY + " 4 " + RESET);
+            System.out.println(BLACKONGRAY + " 5 " + BLUEONWHITE + "   " + BLUEONBLACK +
+                    "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE +
+                    "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK +
+                    "   " + BLACKONGRAY + " 5 " + RESET);
+            System.out.println(BLACKONGRAY + " 6 " + BLUEONBLACK + "   " + BLUEONWHITE +
+                    "   " + BLUEONBLACK + "   " + BLUEONWHITE + "   " + BLUEONBLACK +
+                    "   " + BLUEONWHITE + "   " + BLUEONBLACK + "   " + BLUEONWHITE +
+                    "   " + BLACKONGRAY + " 6 " + RESET);
+            System.out.println(BLACKONGRAY + " 7 " + BLUEONWHITE + " P " + BLUEONBLACK +
+                    " P " + BLUEONWHITE + " P " + BLUEONBLACK + " P " + BLUEONWHITE +
+                    " P " + BLUEONBLACK + " P " + BLUEONWHITE + " P " + BLUEONBLACK +
+                    " P " + BLACKONGRAY + " 7 " + RESET);
+            System.out.println(BLACKONGRAY + " 8 " + BLUEONBLACK + " R " + BLUEONWHITE +
+                    " N " + BLUEONBLACK + " B " + BLUEONWHITE + " K " + BLUEONBLACK +
+                    " Q " + BLUEONWHITE + " B " + BLUEONBLACK + " N " + BLUEONWHITE +
+                    " R " + BLACKONGRAY + " 8 " + RESET);
             System.out.println(BLACKONGRAY + "    h  g  f  e  d  c  b  a    " + RESET);
-        }
-    }
-
-    private String colorHelper(ChessPosition position, ChessBoard board) {
-        String color = "\u001b[";
-        var piece = board.getPiece(position);
-        String foregroundColor = "34;";
-        String pieceType = " ";
-        if (piece != null) {
-            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                foregroundColor = "31;";
-            }
-            pieceType = convertPieceType(piece.getPieceType());
-        }
-        String backgroundColor = "107;";
-        if ((position.getRow() % 2 == 0 && position.getColumn() % 2 == 0) || (position.getRow() % 2 == 1 && position.getColumn() % 2 == 1)) {
-            backgroundColor = "40;";
-        }
-        return color + foregroundColor + backgroundColor + "1m" + " " + pieceType + " ";
-    }
-
-    private String convertPieceType(ChessPiece.PieceType type) {
-        switch (type) {
-            case ChessPiece.PieceType.ROOK:
-                return "R";
-            case ChessPiece.PieceType.BISHOP:
-                return "B";
-            case ChessPiece.PieceType.KNIGHT:
-                return "N";
-            case ChessPiece.PieceType.KING:
-                return "K";
-            case ChessPiece.PieceType.QUEEN:
-                return "Q";
-            case ChessPiece.PieceType.PAWN:
-                return "P";
-            default:
-                return " ";
         }
     }
 
