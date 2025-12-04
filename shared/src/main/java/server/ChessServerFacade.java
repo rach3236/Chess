@@ -14,48 +14,48 @@ public class ChessServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
 
-    public ChessServerFacade(String url) {
-        serverUrl = url;
+    public ChessServerFacade(int port) {
+        serverUrl = "http://localhost:" + port;
     }
 
-    public RegisterResponse register(UserData user) throws ResponseException {
+    public RegisterResponse register(UserData user) throws Exception, ResponseException {
         var request = buildRequest("POST", "/user", user, "");
         var response = sendRequest(request);
         return handleResponse(response, RegisterResponse.class);
     }
 
-    public RegisterResponse login(UserData user) throws ResponseException {
+    public LoginResponse login(UserData user) throws Exception {
         var request = buildRequest("POST", "/session", user, "");
         var response = sendRequest(request);
-        return handleResponse(response, RegisterResponse.class);
+        return handleResponse(response, LoginResponse.class);
     }
 
     //TO DO: probably a bool, some response to handle not getting an object back
-    public void logout(String auth) throws ResponseException {
+    public void logout(String auth) throws Exception {
         var request = buildRequest("DELETE", "/session", null, auth);
         var response = sendRequest(request);
         handleResponse(response, Error.class);
     }
 
-    public Games listGames(String auth) throws ResponseException {
+    public Games listGames(String auth) throws Exception, ResponseException {
         var request = buildRequest("GET", "/game", null, auth);
         var response = sendRequest(request);
         return handleResponse(response, Games.class);
     }
 
-    public GameID createGame(GameData game, String auth) throws ResponseException {
+    public GameID createGame(GameData game, String auth) throws Exception, ResponseException {
         var request = buildRequest("POST", "/game", game, auth);
         var response = sendRequest(request);
         return handleResponse(response, GameID.class);
     }
 
-    public void joinPlayer(PlayerInfo player, String auth) throws ResponseException {
+    public void joinPlayer(PlayerInfo player, String auth) throws Exception, ResponseException {
         var request = buildRequest("PUT", "/game", player, auth);
         var response = sendRequest(request);
         handleResponse(response, Error.class);
     }
 
-    public void clear() throws ResponseException {
+    public void clear() throws Exception, ResponseException {
         var request = buildRequest("DELETE", "/db", null, null);
         var response = sendRequest(request);
         handleResponse(response, Error.class);
@@ -92,8 +92,20 @@ public class ChessServerFacade {
 
     // Maybe handle not "response T" w/ a method
 
-    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws Exception {
         var status = response.statusCode();
+        switch (status) {
+            case 400:
+                throw new Exception("Oh no! Looks like one of the fields you entered is invalid! Please enter valid fields.");
+            case 401:
+                throw new Exception("Oh no! Looks like you're unauthorized for that action.");
+            case 403:
+                throw new Exception("Oh no! Looks like the information you've entered is already taken by another user:) \nPlease enter in an unique username and password");
+            case 500:
+                throw new Exception("Oh no! Looks like we've encountered an error!😬 Please try again later.");
+            default:
+                break;
+        }
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
