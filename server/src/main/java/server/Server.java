@@ -1,5 +1,11 @@
 package server;
 
+import io.javalin.websocket.*;
+import server.websocket.WebSocketHandler;
+import websocket.commands.UserGameCommand;
+//import websocket.commands.UserGameCommand;ServerMessage;
+import org.eclipse.jetty.websocket.api.Session;
+import org.jetbrains.annotations.NotNull;
 import service.*;
 import com.google.gson.Gson;
 import datamodel.*;
@@ -7,16 +13,23 @@ import datamodel.Error;
 import io.javalin.*;
 import io.javalin.http.Context;
 
-
 public class Server {
 
     private final Javalin myServer;
     private final UserService userService = new UserService();
     private final static String AUTHTOKEN = "authorization";
 
-
     public Server() {
+
         myServer = Javalin.create(config -> config.staticFiles.add("web"));
+
+        WebSocketHandler wsHandler = new WebSocketHandler();
+
+        myServer.ws("/ws", ws -> {
+            ws.onConnect(wsHandler);
+            ws.onMessage(wsHandler);
+            ws.onClose(wsHandler);
+        });
 
         //handle endpoints here
         myServer.delete("db", this::clear);
@@ -26,11 +39,9 @@ public class Server {
         myServer.get("game", this::listGames);
         myServer.post("game", this::createGames);
         myServer.put("game", this::joinGame);
-
     }
 
-//    Success response	[200] {}
-//    Failure response	[500] { "message": "Error: (description of error)" }
+
     public void clear(Context ctx) {
         var serializer = new Gson();
 
