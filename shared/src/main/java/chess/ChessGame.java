@@ -134,7 +134,6 @@ public class ChessGame {
         return forSureValid;
     }
 
-
     /**
      * Makes a move in a chess game
      *
@@ -285,6 +284,11 @@ public class ChessGame {
         return false;
     }
 
+    //TO DO
+    public boolean checkSubmittedMoves(){
+        return false;
+    }
+
     /**
      * Sets this game's chessboard with a given board
      *
@@ -318,8 +322,9 @@ public class ChessGame {
 }
 
 
-//As a note, I accidentally programmed all of Phase 1 in my Chess Exam respos T_T
-// That's why there might be a bunch of copy pastes, but I'll email the TAs to make sure they're aware when they grade it:)
+
+
+
 
 
 

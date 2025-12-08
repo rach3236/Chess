@@ -99,6 +99,8 @@ public class UserService {
             throw new InvalidAccountException("Error: Already taken");
         }
 
+
+
         //get username
         var playerUsername = dataAccess.getUsername(auth);
         String whiteUsername = null;
@@ -119,6 +121,9 @@ public class UserService {
         dataAccess.updateGameData(playerInfo.gameID(), whiteUsername, blackUsername, gameName);
     }
 
+    private void leaveGame() {
+//        dataAccess.updateGameData(playerInfo.gameID(), whiteUsername, blackUsername, gameName);
+    }
 
     public String getUsername(String auth) {
         return dataAccess.getUsername(auth);

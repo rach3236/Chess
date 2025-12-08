@@ -67,53 +67,64 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void connect(Session session, ConnectGameCommand command) throws Exception {
         connections.add(session, command);
-//        System.out.println("got to connect method:)");
-//        String player1 = "fake_player1";
         var playerName = userService.getUsername(command.getAuthToken());
-        var message = String.format("%s joined the game", playerName);
+
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        connections.broadcast(session, notification);
+
+        if (command.observerStatus()) {
+            // connections.broadcast("OBserver joined the game");
+
+        } else {
+            // connections.broadcast("%s joined the game as " + PlayerColor  + "");
+            //serverMessage.mesageType
+        }
+        //connections.broadcast(Load_game_server_message);
+
     }
 
-    private void makeMove(Session session, MakeMoveGameCommand command) {}
+    private void makeMove(Session session, MakeMoveGameCommand command) {
+    // userService.validateMove(gameID, playerColor, move);
+        // if (validMove) {
+        //      updateGameData w/ new game state
+        //      connections.broadcast(loadGame)
+        //      connections.broadcast(notification: playerColor "moved from " + startPosition + " to " + endPosition)
+        //      if (move -> check/checkmate) {
+        //          connections.broadcast(CHECK)
+//              } else if (move -> checkmate) {
+//                    connections.broadcast(CHECKMATE);
+//                } else if (move -> stalemate) {
+//                  connections.broadcast(STALEMATE);
+//                }
+        //
+        // } else {
+        //    connections.broadcast(Error: bad move sonny)
+        // }
+        //
+
+        // QUESTION FOR TAs to fight about: horrible instruction my friend,
+        // what to do when player makes an incorrect move?
+
+    }
 
     private void leave(Session session, UserGameCommand command) {
+        // userService.leaveGame(curr_player_color, null)  w/ new gameState
+        // connections.remove(session);
+        // connections.broadcast(notification that player left);
     }
 
-    private void resign(Session session, UserGameCommand command) {}
+    private void resign(Session session, UserGameCommand command) {
+        //marks the game as over
+        // no more moves possible
+
+        // Questions TA: bro, what do you do w/ the game state when a player resigns?
+
+        // userService.updateGameState
+        // connections.broadcast(notification that opposite player of resignation wins)
+        // leave(command)
+    }
 
 
-//    private void enter(String visitorName, Session session) throws IOException {
-//        connections.add(session);
-//        var message = String.format("%s is in the shop", visitorName);
-//        var notification = new Notification(Notification.Type.ARRIVAL, message);
-//        connections.broadcast(session, notification);
-//    }
 
-//    private void leave() throws Exception {
-//        var message = "smth";
-//        var notification = new Notification(Notification.Type.DEPARTURE, message);
-//        connections.broadcast(game, notification);
-//        connections.remove(session);
-//    }
-//
-//    private void resign() throws Exception {
-//        var mensaje = "smth";
-//
-//        //call win method
-//        win(resign);
-//        connections.broadcast(game, notification);
-//        connections.remove(session);
-//    }
-
-//    public void makeNoise(String petName, String sound) throws ResponseException {
-//        try {
-//            var message = String.format("%s says %s", petName, sound);
-//            var notification = new Notification(Notification.Type.NOISE, message);
-//            connections.broadcast(null, notification);
-//        } catch (Exception ex) {
-//            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
-//        }
 
 
 
