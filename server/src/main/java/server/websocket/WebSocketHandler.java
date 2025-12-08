@@ -8,8 +8,11 @@ import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
-import org.eclipse.jetty.websocket.api.Session;
+import jakarta.websocket.*;
+import service.UserService;
+import websocket.commands.ConnectGameCommand;
 import websocket.commands.UserGameCommand;
+import websocket.commands.MakeMoveGameCommand;
 import websocket.messages.ServerMessage;
 
 import javax.management.Notification;
@@ -18,6 +21,12 @@ import java.io.IOException;
 import static websocket.commands.UserGameCommand.CommandType.*;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
+
+    private static UserService userService;
+    public WebSocketHandler(UserService uService) {
+        this.userService = uService;
+    }
+
 
     private final ConnectionManager connections = new ConnectionManager();
 
@@ -28,6 +37,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
+    //ASK TA: jakart vs. jetty? wassup w/ that? how to do broadcast
     @Override
     public void handleMessage(WsMessageContext ctx) throws Exception {
         try {
@@ -35,10 +45,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             System.out.println("blah: " + command.getCommandType());
             switch (command.getCommandType()) {
-                case CONNECT -> connect(ctx.session);
-                case MAKE_MOVE -> System.out.println("Hi");
-                case LEAVE -> empty();
-                case RESIGN -> empty();
+                case CONNECT -> connect(ctx.session,  new Gson().fromJson(ctx.message(), ConnectGameCommand.class));
+                case MAKE_MOVE -> makeMove(ctx.session,  new Gson().fromJson(ctx.message(), MakeMoveGameCommand.class));
+                case LEAVE -> leave(ctx.session, command);
+                case RESIGN -> resign(ctx.session, command);
             }
         } catch (Exception ex) {
             //TO DO
@@ -55,15 +65,22 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void empty() {
     }
 
-    private void connect(Session session) throws Exception {
-        connections.add(session);
-        System.out.println("got to connect method:)");
-        String player1 = "fake_player1";
-        var message = String.format("%s joined the game", player1);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+    private void connect(Session session, ConnectGameCommand command) throws Exception {
+        connections.add(session, command);
+//        System.out.println("got to connect method:)");
+//        String player1 = "fake_player1";
+        var playerName = userService.getUsername(command.getAuthToken());
+        var message = String.format("%s joined the game", playerName);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
         connections.broadcast(session, notification);
     }
 
+    private void makeMove(Session session, MakeMoveGameCommand command) {}
+
+    private void leave(Session session, UserGameCommand command) {
+    }
+
+    private void resign(Session session, UserGameCommand command) {}
 
 
 //    private void enter(String visitorName, Session session) throws IOException {

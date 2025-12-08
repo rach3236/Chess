@@ -168,7 +168,7 @@ private static boolean postLoginUI(String[] arguments, ArgsHelper helper) {
                 server.joinPlayer(player1, helper.authKey);
 
                 //move player to game play UI
-                webSocketServer.connect(helper.authKey, player1.gameID());
+                webSocketServer.connect(helper.authKey, player1.gameID(), false);
 
                 drawBoard(arguments[2]);
             } catch (Exception e) {

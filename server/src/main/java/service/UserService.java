@@ -119,6 +119,11 @@ public class UserService {
         dataAccess.updateGameData(playerInfo.gameID(), whiteUsername, blackUsername, gameName);
     }
 
+
+    public String getUsername(String auth) {
+        return dataAccess.getUsername(auth);
+    }
+
     public UserService() {
 //        this.dataAccess = new MemoryDataAccess();
         this.dataAccess = new SQLDataAccess();

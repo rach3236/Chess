@@ -6,7 +6,6 @@ import datamodel.UserData;
 
 public interface DataAccess {
 
-
     public void delete();
     void addUser(UserData user, String auth);
     void addSession(String auth, String username);

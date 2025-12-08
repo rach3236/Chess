@@ -23,11 +23,11 @@ public class Server {
 
         myServer = Javalin.create(config -> config.staticFiles.add("web"));
 
-        WebSocketHandler wsHandler = new WebSocketHandler();
+        WebSocketHandler wsHandler = new WebSocketHandler(userService);
 
         myServer.ws("/ws", ws -> {
             ws.onConnect(wsHandler);
-            ws.onMessage(wsHandler);
+//            ws.onMessage(wsHandler);
             ws.onClose(wsHandler);
         });
 

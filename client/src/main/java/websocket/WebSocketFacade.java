@@ -5,6 +5,7 @@ import org.eclipse.jetty.io.EndPoint;
 import websocket.*;
 
 import jakarta.websocket.*;
+import websocket.commands.ConnectGameCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -45,9 +46,9 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void connect(String authToken, int gameID) throws Exception {
+    public void connect(String authToken, int gameID, boolean observerStatus) throws Exception {
         try {
-            var command = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
+            var command = new ConnectGameCommand(ConnectGameCommand.CommandType.CONNECT, authToken, gameID, observerStatus);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (Exception ex) {
             throw new Exception(ex.getMessage());
