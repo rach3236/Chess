@@ -1,4 +1,4 @@
-import chess.ChessBoard;
+import chess.*;
 import datamodel.GameData;
 import datamodel.PlayerInfo;
 import datamodel.UserData;
@@ -8,6 +8,7 @@ import websocket.WebSocketFacade;
 import websocket.messages.ServerMessage;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class ChessClient implements NotificationHandler {
@@ -89,6 +90,8 @@ private static boolean preLoginUI(String[] arguments, ArgsHelper helper) {
             System.out.println("login <USERNAME> <PASSWORD> - to play chess");
             System.out.println("quit - playing chess");
             System.out.println("help - with possible commands");
+            var newBoard = new ChessGame();
+            drawBoard(newBoard.getBoard(), "WHITE", null, null);
             break;
 
         case "quit":
@@ -188,9 +191,9 @@ private static boolean postLoginUI(String[] arguments, ArgsHelper helper) {
 
                 //move player to game play UI
                 webSocketServer.connect(helper.authKey, playerInfo.gameID(), false);
-                gamePlayUI(playerInfo, helper, gameList.get(ind-1).gameID());
+                //TO DO fix whatever's wrong here haha
+                gamePlayUI(helper, gameList.get(ind-1).gameID());
 
-                drawBoard(arguments[2]);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
@@ -208,7 +211,6 @@ private static boolean postLoginUI(String[] arguments, ArgsHelper helper) {
                 }
                 int ind = Integer.parseInt(arguments[1]);
                 int gameID = gameList.get(ind - 1).gameID();
-                drawBoard(WHITE);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
                 return true;
@@ -323,7 +325,7 @@ public static void gamePlayUI(ArgsHelper helper, int gameID) {
 
 
 
-private static void drawBoard(String colorPOV) {
+private static void drawStartBoard(String colorPOV) {
     //default board
     if (colorPOV.equals(WHITE)) {
         System.out.println(BLACKONGRAY + "    a  b  c  d  e  f  g  h    " + RESET);
@@ -398,43 +400,85 @@ private static void drawBoard(String colorPOV) {
     }
 }
 
-//    private String colorHelper(ChessPosition position, ChessBoard board) {
-//        String color = "\u001b[";
-//        var piece = board.getPiece(position);
-//        String foregroundColor = "34;";
-//        String pieceType = " ";
-//        if (piece != null) {
-//            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-//                foregroundColor = "31;";
-//            }
-//            pieceType = convertPieceType(piece.getPieceType());
-//        }
-//        String backgroundColor = "107;";
-//        if ((position.getRow() % 2 == 0 && position.getColumn() % 2 == 0) ||
-//                (position.getRow() % 2 == 1 && position.getColumn() % 2 == 1)) {
-//            backgroundColor = "40;";
-//        }
-//        return color + foregroundColor + backgroundColor + "1m" + " " + pieceType + " ";
-//    }
-//
-//    private String convertPieceType(ChessPiece.PieceType type) {
-//        switch (type) {
-//            case ChessPiece.PieceType.ROOK:
-//                return "R";
-//            case ChessPiece.PieceType.BISHOP:
-//                return "B";
-//            case ChessPiece.PieceType.KNIGHT:
-//                return "N";
-//            case ChessPiece.PieceType.KING:
-//                return "K";
-//            case ChessPiece.PieceType.QUEEN:
-//                return "Q";
-//            case ChessPiece.PieceType.PAWN:
-//                return "P";
-//            default:
-//                return " ";
-//        }
-//    }
+
+    private static void drawBoard(ChessBoard board, String pov, ArrayList<ChessMove> moves, ChessPosition currPos) {
+
+        ArrayList<String> rows = new ArrayList<>(
+                List.of(" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 ")
+        );
+
+        String columns = "    a  b  c  d  e  f  g  h    ";
+        if (pov == "BLACK") {
+            columns = new StringBuilder(columns).reverse().toString();
+        }
+        for (int i=0; i < 10; i++) {
+            if (i == 0 || i == 9) {
+                System.out.println(BLACKONGRAY + columns + RESET);
+                continue;
+            }
+            String line = "";
+            for (int j=0; j < 10; j++) {
+
+                if (j==0 || j==9){
+                    line += BLACKONGRAY + rows.get(rows.size() - i);
+                    continue;
+                }
+                line += colorHelper(new ChessPosition(9-i, j), board);
+            }
+            System.out.println(line + RESET);
+        }
+    }
+
+    private static String colorHelper(ChessPosition position, ChessBoard board) {
+        String color = "\u001b[";
+        var piece = board.getPiece(position);
+        String foregroundColor = "34;";
+        String pieceType = " ";
+        if (piece != null) {
+            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                foregroundColor = "31;";
+            }
+            pieceType = convertPieceType(piece.getPieceType());
+        }
+        String backgroundColor = "107;";
+        if ((position.getRow() % 2 == 0 && position.getColumn() % 2 == 0) ||
+                (position.getRow() % 2 == 1 && position.getColumn() % 2 == 1)) {
+            backgroundColor = "40;";
+        }
+        return color + foregroundColor + backgroundColor + "1m" + " " + pieceType + " ";
+    }
+
+    private static String convertPieceType(ChessPiece.PieceType type) {
+        switch (type) {
+            case ChessPiece.PieceType.ROOK:
+                return "R";
+            case ChessPiece.PieceType.BISHOP:
+                return "B";
+            case ChessPiece.PieceType.KNIGHT:
+                return "N";
+            case ChessPiece.PieceType.KING:
+                return "K";
+            case ChessPiece.PieceType.QUEEN:
+                return "Q";
+            case ChessPiece.PieceType.PAWN:
+                return "P";
+            default:
+                return " ";
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 private static String loginCheck(String[] inputs) {

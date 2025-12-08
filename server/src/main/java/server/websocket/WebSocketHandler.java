@@ -41,11 +41,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             System.out.println("blah: " + command.getCommandType());
+            //TO DO
             switch (command.getCommandType()) {
-                case CONNECT -> connect(ctx.session,  new Gson().fromJson(ctx.message(), ConnectGameCommand.class));
-                case MAKE_MOVE -> makeMove(ctx.session,  new Gson().fromJson(ctx.message(), MakeMoveGameCommand.class));
-                case LEAVE -> leave(ctx.session, command);
-                case RESIGN -> resign(ctx.session, command);
+//                case CONNECT -> connect(ctx.session,  new Gson().fromJson(ctx.message(), ConnectGameCommand.class));
+//                case MAKE_MOVE -> makeMove(ctx.session,  new Gson().fromJson(ctx.message(), MakeMoveGameCommand.class));
+//                case LEAVE -> leave(ctx.session, command);
+//                case RESIGN -> resign(ctx.session, command);
             }
         } catch (Exception ex) {
             //TO DO
@@ -56,14 +57,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     @Override
     public void handleClose(WsCloseContext ctx) {
         System.out.println("Websocket closed");
-        connections.remove(ctx.session);
+        //TO DO
+//        connections.remove(ctx.session);
     }
 
     private void connect(Session session, ConnectGameCommand command) throws Exception {
         connections.add(session, command);
         var playerName = userService.getUsername(command.getAuthToken());
 
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        //TO DO
+//        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
 
         if (command.observerStatus()) {
             //TO DO
