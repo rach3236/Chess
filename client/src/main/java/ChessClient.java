@@ -1,3 +1,4 @@
+import chess.ChessBoard;
 import datamodel.GameData;
 import datamodel.PlayerInfo;
 import datamodel.UserData;
@@ -25,6 +26,7 @@ public class ChessClient implements NotificationHandler {
     //highlighting square color combo
     //(phase 6)
     private static ArrayList<GameData> gameList;
+    private ChessBoard gameBoardOject;
 
     public ChessClient() throws Exception {
         String serverUrl = "http://localhost:8080";
@@ -59,7 +61,23 @@ public class ChessClient implements NotificationHandler {
 public void notify(ServerMessage notification) {
         System.out.println("BLAH");
     System.out.println(REDONBLACK + notification.getServerMessage());
-    //TO DO printPrompt();
+
+    switch (notification.getServerMessageType()) {
+        case ServerMessage.ServerMessageType.LOAD_GAME:
+            // blahNew = fromJson(notification.getServerMessage, gameState);
+//            gameBoardObject = blahNew.gameState();
+            //System.out.println(serverMessage)
+            //drawBoard(gameState)
+            break;
+
+        case ServerMessage.ServerMessageType.ERROR:
+            System.out.println(notification.getServerMessage());
+            break;
+
+        case ServerMessage.ServerMessageType.NOTIFICATION:
+            System.out.println(notification.getServerMessage());
+            break;
+    }
 }
 
 private static boolean preLoginUI(String[] arguments, ArgsHelper helper) {
@@ -164,11 +182,12 @@ private static boolean postLoginUI(String[] arguments, ArgsHelper helper) {
                     return true;
                 }
                 ind = Integer.parseInt(arguments[1]);
-                PlayerInfo player1 = new PlayerInfo(arguments[2], gameList.get(ind-1).gameID());
-                server.joinPlayer(player1, helper.authKey);
+                PlayerInfo playerInfo = new PlayerInfo(arguments[2], gameList.get(ind-1).gameID());
+                server.joinPlayer(playerInfo, helper.authKey);
 
                 //move player to game play UI
-                webSocketServer.connect(helper.authKey, player1.gameID(), false);
+                webSocketServer.connect(helper.authKey, playerInfo.gameID(), false);
+                gamePlayUI(playerInfo, helper, gameList.get(ind-1).gameID());
 
                 drawBoard(arguments[2]);
             } catch (Exception e) {
@@ -220,6 +239,87 @@ private static boolean postLoginUI(String[] arguments, ArgsHelper helper) {
     }
     return true;
 }
+
+
+
+public static void gamePlayUI(PlayerInfo playerInfo, ArgsHelper helper, int gameID) {
+        while (true) {
+
+            System.out.printf("[LOGGED_IN] >>> ");
+            Scanner scanner = new Scanner(System.in);
+            String line = scanner.nextLine();
+            var arguments = line.split(" ");
+
+            switch (arguments[0].toLowerCase()) {
+
+                case "help":
+                    System.out.println("""
+                            List of possible commands:
+                            
+                            'help' - displays possible commands
+                            'redraw_chess_board' - draws and displays the chess board
+                            'make_move <START POSITION> <END POSITION>' - make a move
+                            'leave' - leave current game
+                            'resign' - resign from current game, other player wins
+                            'highlight_legal_moves' - see current possible moves to make as displayed on the board
+                            """);
+                    break;
+                case "redraw_chess_board":
+                    //validate arguments
+//                    drawBoard(gameBoardObject);
+                    break;
+                case "make_move":
+                    // validate makeMove arguments
+                    //if !cool
+                    //  system.out.println(error)
+                    // else {
+                    // }
+                    break;
+                case "leave":
+                    //validate arguments
+                    try {
+                        webSocketServer.leave(helper.authKey, gameID);
+                        return;
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+                     return;
+                case "resign":
+                    //validate arguments
+
+//                    System
+                    System.out.printf("Do you really want to resign?👀 ('y'/'n') >>> ");
+                    line = scanner.nextLine();
+
+                    if (line.equals("y")) {
+                        try {
+                            webSocketServer.resign(helper.authKey, gameID);
+                            break;
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
+                    }
+
+                    break;
+                case "highlight_legal_moves":
+                    // get possible moves (player Color)
+                    // display possible moves
+                    // @override ? draw board w/ possible moves highlighted (pass in gameState & possMoves)
+
+                    break;
+
+
+
+                default:
+                    System.out.println("Not a valid command. Please type 'help' for options");
+            }
+
+        }
+    }
+
+
+
+
 
 private static void drawBoard(String colorPOV) {
     //default board
@@ -295,6 +395,45 @@ private static void drawBoard(String colorPOV) {
         System.out.println(BLACKONGRAY + "    h  g  f  e  d  c  b  a    " + RESET);
     }
 }
+
+//    private String colorHelper(ChessPosition position, ChessBoard board) {
+//        String color = "\u001b[";
+//        var piece = board.getPiece(position);
+//        String foregroundColor = "34;";
+//        String pieceType = " ";
+//        if (piece != null) {
+//            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+//                foregroundColor = "31;";
+//            }
+//            pieceType = convertPieceType(piece.getPieceType());
+//        }
+//        String backgroundColor = "107;";
+//        if ((position.getRow() % 2 == 0 && position.getColumn() % 2 == 0) ||
+//                (position.getRow() % 2 == 1 && position.getColumn() % 2 == 1)) {
+//            backgroundColor = "40;";
+//        }
+//        return color + foregroundColor + backgroundColor + "1m" + " " + pieceType + " ";
+//    }
+//
+//    private String convertPieceType(ChessPiece.PieceType type) {
+//        switch (type) {
+//            case ChessPiece.PieceType.ROOK:
+//                return "R";
+//            case ChessPiece.PieceType.BISHOP:
+//                return "B";
+//            case ChessPiece.PieceType.KNIGHT:
+//                return "N";
+//            case ChessPiece.PieceType.KING:
+//                return "K";
+//            case ChessPiece.PieceType.QUEEN:
+//                return "Q";
+//            case ChessPiece.PieceType.PAWN:
+//                return "P";
+//            default:
+//                return " ";
+//        }
+//    }
+
 
 private static String loginCheck(String[] inputs) {
 //        System.out.println("login <USERNAME> <PASSWORD> - to play chess");

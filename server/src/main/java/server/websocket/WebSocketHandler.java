@@ -34,7 +34,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void handleConnect(WsConnectContext ctx) {
         System.out.println("Websocket connected");
         ctx.enableAutomaticPings();
-
     }
 
     //ASK TA: jakart vs. jetty? wassup w/ that? how to do broadcast
@@ -60,9 +59,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void handleClose(WsCloseContext ctx) {
         System.out.println("Websocket closed");
         connections.remove(ctx.session);
-    }
-
-    private void empty() {
     }
 
     private void connect(Session session, ConnectGameCommand command) throws Exception {
@@ -122,16 +118,5 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         // connections.broadcast(notification that opposite player of resignation wins)
         // leave(command)
     }
-
-
-
-
-
-
-
-
-
-
-
 }
 

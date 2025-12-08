@@ -1,5 +1,6 @@
 package websocket;
 
+import chess.ChessMove;
 import com.google.gson.Gson;
 import org.eclipse.jetty.io.EndPoint;
 import websocket.*;
@@ -56,16 +57,16 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    public void makeMove(String visitorName) throws Exception {
+    public void makeMove(String authToken, int gameID, ChessMove move) throws Exception {
         try {
-            var command = new MakeMoveGameCommand(MakeMoveGameCommand.CommandType.MAKE_MOVE, authToken, gameID);
+            var command = new MakeMoveGameCommand(MakeMoveGameCommand.CommandType.MAKE_MOVE, authToken, gameID, move);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (Exception ex) {
             throw new Exception(ex.getMessage());
         }
     }
 
-    public void leave(String visitorName) throws Exception {
+    public void leave(String authToken, int gameID) throws Exception {
         try {
             var command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
@@ -74,7 +75,7 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    public void resign(String visitorName) throws Exception {
+    public void resign(String authToken, int gameID) throws Exception {
         try {
             var command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
