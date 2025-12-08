@@ -24,9 +24,11 @@ public class ConnectionManager {
 
     public void broadcast(Session session, UserGameCommand command, ServerMessage notification) {
         //compare w/ what the server terminal prints out
+        //TO DO
         System.out.println(notification.getServerMessage());
 
         try {
+            //??? TO DO
             session.getBasicRemote().sendText(notification.getServerMessage());
         } catch (Exception e) {
             System.out.println(e.getMessage());

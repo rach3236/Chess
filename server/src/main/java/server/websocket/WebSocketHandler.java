@@ -27,7 +27,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         this.userService = uService;
     }
 
-
     private final ConnectionManager connections = new ConnectionManager();
 
     @Override
@@ -36,11 +35,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         ctx.enableAutomaticPings();
     }
 
-    //ASK TA: jakart vs. jetty? wassup w/ that? how to do broadcast
+    //QUESTION FOR THE TAs: jakart vs. jetty? wassup w/ that? how to do broadcast
     @Override
     public void handleMessage(WsMessageContext ctx) throws Exception {
         try {
-//            USER COMMAND Action action = new Gson().fromJson(ctx.message(), Action.class);
             UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             System.out.println("blah: " + command.getCommandType());
             switch (command.getCommandType()) {
@@ -68,7 +66,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
 
         if (command.observerStatus()) {
-            // connections.broadcast("OBserver joined the game");
+            //TO DO
+            // connections.broadcast("Observer joined the game");
 
         } else {
             // connections.broadcast("%s joined the game as " + PlayerColor  + "");
@@ -79,6 +78,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void makeMove(Session session, MakeMoveGameCommand command) {
+        //TO DO
     // userService.validateMove(gameID, playerColor, move);
         // if (validMove) {
         //      updateGameData w/ new game state
@@ -103,12 +103,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void leave(Session session, UserGameCommand command) {
+        //TO DO
         // userService.leaveGame(curr_player_color, null)  w/ new gameState
         // connections.remove(session);
         // connections.broadcast(notification that player left);
     }
 
     private void resign(Session session, UserGameCommand command) {
+        //TO DO
         //marks the game as over
         // no more moves possible
 

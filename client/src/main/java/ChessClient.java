@@ -64,6 +64,7 @@ public void notify(ServerMessage notification) {
 
     switch (notification.getServerMessageType()) {
         case ServerMessage.ServerMessageType.LOAD_GAME:
+            //TO DO
             // blahNew = fromJson(notification.getServerMessage, gameState);
 //            gameBoardObject = blahNew.gameState();
             //System.out.println(serverMessage)
@@ -240,9 +241,7 @@ private static boolean postLoginUI(String[] arguments, ArgsHelper helper) {
     return true;
 }
 
-
-
-public static void gamePlayUI(PlayerInfo playerInfo, ArgsHelper helper, int gameID) {
+public static void gamePlayUI(ArgsHelper helper, int gameID) {
         while (true) {
 
             System.out.printf("[LOGGED_IN] >>> ");
@@ -265,10 +264,12 @@ public static void gamePlayUI(PlayerInfo playerInfo, ArgsHelper helper, int game
                             """);
                     break;
                 case "redraw_chess_board":
+                    //TO DO
                     //validate arguments
 //                    drawBoard(gameBoardObject);
                     break;
                 case "make_move":
+                    // TO DO:
                     // validate makeMove arguments
                     //if !cool
                     //  system.out.println(error)
@@ -285,10 +286,9 @@ public static void gamePlayUI(PlayerInfo playerInfo, ArgsHelper helper, int game
                     }
                      return;
                 case "resign":
-                    //validate arguments
+                    //TO DO: validate arguments
 
-//                    System
-                    System.out.printf("Do you really want to resign?👀 ('y'/'n') >>> ");
+                    System.out.println("Do you really want to resign?👀 ('y'/'n') >>> ");
                     line = scanner.nextLine();
 
                     if (line.equals("y")) {
@@ -302,8 +302,10 @@ public static void gamePlayUI(PlayerInfo playerInfo, ArgsHelper helper, int game
 
                     break;
                 case "highlight_legal_moves":
-                    // get possible moves (player Color)
-                    // display possible moves
+                    //TO DO:
+                    // allows user to input piece for which they want legal moves
+                    // get possible moves (playerColor, chessPosition)
+                    // display possible moves, drawBoard(gameState, validMoves, ChessPosition)
                     // @override ? draw board w/ possible moves highlighted (pass in gameState & possMoves)
 
                     break;
