@@ -12,9 +12,7 @@ import io.javalin.websocket.WsMessageHandler;
 import org.eclipse.jetty.websocket.api.Session;
 
 import service.UserService;
-import websocket.commands.ConnectGameCommand;
 import websocket.commands.UserGameCommand;
-import websocket.commands.MakeMoveGameCommand;
 import websocket.messages.ServerMessage;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
@@ -39,8 +37,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             System.out.println("blah: " + command.getCommandType());
 
             switch (command.getCommandType()) {
-                case CONNECT -> connect(ctx.session,  new Gson().fromJson(ctx.message(), ConnectGameCommand.class));
-                case MAKE_MOVE -> makeMove(ctx.session,  new Gson().fromJson(ctx.message(), MakeMoveGameCommand.class));
+                case CONNECT -> connect(ctx.session,  new Gson().fromJson(ctx.message(), UserGameCommand.class));
+                case MAKE_MOVE -> makeMove(ctx.session,  new Gson().fromJson(ctx.message(), UserGameCommand.class));
                 case LEAVE -> leave(ctx.session, command);
                 case RESIGN -> resign(ctx.session, command);
             }
@@ -56,7 +54,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 //        connections.remove(ctx.session);
     }
 
-    private void connect(Session session, ConnectGameCommand command) throws Exception {
+    private void connect(Session session, UserGameCommand command) throws Exception {
         connections.add(session, command);
         var playerName = userService.getUsername(command.getAuthToken());
 
@@ -71,7 +69,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(session, command, notification);
     }
 
-    private void makeMove(Session session, MakeMoveGameCommand command) {
+    private void makeMove(Session session, UserGameCommand command) {
         //TO DO
     // userService.validateMove(gameID, playerColor, move);
         // if (validMove) {
@@ -118,7 +116,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
 
         ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, playerName + " left the game", null, null);
-        connections.remove(session);
+        connections.remove(session, command, notification);
         connections.broadcast(session, command, notification);
     }
 

@@ -8,19 +8,27 @@ import websocket.messages.ServerMessage;
 
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
 
     //TO DO: fix hash map to map users/game data to game ID
-    public final ConcurrentHashMap<Session, Session> connections = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<Integer, Set<Session>> connections = new ConcurrentHashMap<>();
 
     public void add(Session session, UserGameCommand command) {
-        connections.put(session, session);
+        if (!connections.containsKey(command.getGameID())) {
+            Set<Session> seshList = Set.of(session);
+            connections.put(command.getGameID(), seshList);
+        } else {
+            var seshList = connections.get(command.getGameID());
+            seshList.add(session);
+        }
     }
 
-    public void remove(Session session) {
-        connections.remove(session);
+    public void remove(Session session, UserGameCommand command, ServerMessage notification) {
+        var sessionsList = connections.get(command.getGameID());
+        sessionsList.remove(session);
     }
 
     public void broadcast(Session session, UserGameCommand command, ServerMessage notification) {
@@ -32,13 +40,17 @@ public class ConnectionManager {
             //??? TO DO filter who we broadcast to.
             //TO DO loop through connections
             if ((command.getCommandType()== UserGameCommand.CommandType.CONNECT) || command.getCommandType() == UserGameCommand.CommandType.LEAVE) {
-                for (Map.Entry<Session, Session> c : connections.entrySet()) {
-                    if (c.getValue()==session) {
+
+                var sessionsList = connections.get(command.getGameID());
+                for (Session sesh : sessionsList) {
+                    // TO DO check to see if player color/session is the same as this call
+                    if (sesh == session) {
                         continue;
                     }
                     String msg = new Gson().toJson(notification);
-                    session.getRemote().sendString(msg);
+                    sesh.getRemote().sendString(msg);
                 }
+
             }
 
             String msg = new Gson().toJson(notification);

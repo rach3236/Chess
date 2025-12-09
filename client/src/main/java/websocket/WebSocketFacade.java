@@ -2,18 +2,12 @@ package websocket;
 
 import chess.ChessMove;
 import com.google.gson.Gson;
-import org.eclipse.jetty.io.EndPoint;
-import websocket.*;
 
 import jakarta.websocket.*;
-import websocket.commands.ConnectGameCommand;
-import websocket.commands.MakeMoveGameCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 
 public class WebSocketFacade extends Endpoint {
@@ -51,16 +45,16 @@ public class WebSocketFacade extends Endpoint {
 
     public void connect(String authToken, int gameID, boolean observerStatus, String pov) throws Exception {
         try {
-            var command = new ConnectGameCommand(ConnectGameCommand.CommandType.CONNECT, authToken, gameID, observerStatus, pov);
+            var command = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, observerStatus, pov, null);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (Exception ex) {
             throw new Exception(ex.getMessage());
         }
     }
 
-    public void makeMove(String authToken, int gameID, ChessMove move) throws Exception {
+    public void makeMove(String authToken, int gameID, boolean obStatus, String pov, ChessMove move) throws Exception {
         try {
-            var command = new MakeMoveGameCommand(MakeMoveGameCommand.CommandType.MAKE_MOVE, authToken, gameID, move);
+            var command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, obStatus, pov, move);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (Exception ex) {
             throw new Exception(ex.getMessage());
@@ -69,7 +63,7 @@ public class WebSocketFacade extends Endpoint {
 
     public void leave(String authToken, int gameID, Boolean obsStat, String pov) throws Exception {
         try {
-            var command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID, obsStat, pov);
+            var command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID, obsStat, pov, null);
             System.out.println("What?");
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
             System.out.println("Ok");
@@ -78,9 +72,9 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    public void resign(String authToken, int gameID) throws Exception {
+    public void resign(String authToken, int gameID, boolean obStatus, String pov) throws Exception {
         try {
-            var command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
+            var command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID, obStatus, null, null);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (Exception ex) {
             throw new Exception(ex.getMessage());

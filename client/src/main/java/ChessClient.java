@@ -261,12 +261,14 @@ public class ChessClient implements NotificationHandler {
                             'make_move <START POSITION> <END POSITION>' - make a move
                             'leave' - leave current game
                             'resign' - resign from current game, other player wins
-                            'highlight_legal_moves <CHESS PIECE POSITION>' - see current possible moves to make as displayed on the board
+                            'highlight <CHESS PIECE POSITION>' - see current possible moves to make as displayed on the board
                             """);
                     break;
                 case "redraw":
+                    var checkRedrawArgs = checkRedraw(arguments);
+                    if (checkRedrawArgs != null) {System.out.println(checkRedrawArgs); break;}
                     //TO DO
-                    //validate arguments
+//                    get game state
 //                    drawBoard(gameBoardObject);
                     break;
                 case "make_move":
@@ -274,15 +276,18 @@ public class ChessClient implements NotificationHandler {
                         System.out.println("The game is over dummy;)");
                         break;
                     }
-                    // TO DO:
-                    // validate makeMove arguments
-                    //if !cool
-                    //  system.out.println(error)
-                    // else {
-                    // }
+
+                    var checkMoveArgs = checkMakeMove(arguments);
+                    if (checkMoveArgs != null) {System.out.println(checkMoveArgs); break;}
+                    //TO DO
+                    //handle move check on server end
+                    //send in move, catch exception and print user friendly error
+
                     break;
                 case "leave":
-                    //validate arguments
+                    var checkLeaveArgs = checkLeave(arguments);
+                    if (checkLeaveArgs != null) {System.out.println(checkLeaveArgs); break;}
+
                     try {
                         webSocketServer.leave(helper.authKey, gameID, observerStatus, pov);
                         return;
@@ -291,14 +296,17 @@ public class ChessClient implements NotificationHandler {
                     }
                     return;
                 case "resign":
-                    //TO DO: validate arguments
+                    var checkResignArgs = checkResign(arguments);
+                    if (checkResignArgs != null) {System.out.println(checkResignArgs); break;}
 
                     System.out.println("Do you really want to resign?👀 ('y'/'n') >>> ");
                     line = scanner.nextLine();
 
                     if (line.equals("y")) {
                         try {
-                            webSocketServer.resign(helper.authKey, gameID);
+
+                            //TO DO figure out whether or not to pass inn pov or figure it out on the server end
+                            webSocketServer.resign(helper.authKey, gameID, false, null);
                             break;
                         } catch (Exception e) {
                             System.out.println(e.getMessage());
@@ -306,7 +314,10 @@ public class ChessClient implements NotificationHandler {
                     }
 
                     break;
-                case "highlight_legal_moves":
+                case "highlight":
+                    var checkHighlightResponse = checkHighlight(arguments);
+                    if (checkHighlightResponse != null) {System.out.println(checkHighlightResponse); break;}
+
                     //TO DO:
                     // allows user to input piece for which they want legal moves
                     // get possible moves (pieceMoves in ChessPiece.java, takes a board and a current position)
@@ -318,6 +329,7 @@ public class ChessClient implements NotificationHandler {
 
                 default:
                     System.out.println("Not a valid command. Please type 'help' for options");
+                    return;
             }
 
         }
@@ -618,4 +630,21 @@ public class ChessClient implements NotificationHandler {
         return null;
     }
 
+    private static String checkHighlight(String[] inputs) {
+        if (inputs.length > 2) {
+            return """ 
+                    Oh no! Looks like ou have too many inputs:)
+                    Please format your input like this:
+                    ---->'highlight <CHESS POSITION>'
+                    """;
+        }
+
+        if (!inputs[1].matches("[a-h][1-8]")) {
+            return """
+                    Wait a second, your first move doesn't look like a valid position🤔
+                    Please format your position as a letter and number, like this: a5, b3, h6, d1, f7
+                    """;
+        }
+        return null;
+    }
 }
