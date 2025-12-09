@@ -26,11 +26,11 @@ public class ConnectionManager {
     public void broadcast(Session session, UserGameCommand command, ServerMessage notification) {
         //compare w/ what the server terminal prints out
         //TO DO
-        System.out.println("HEY");
-        System.out.println(notification.getServerMessage());
+        System.out.println("broadcast example");
 
         try {
-            //??? TO DO
+            //??? TO DO filter who we broadcast to.
+            //TO DO loop through connections
             String msg = new Gson().toJson(notification);
             session.getRemote().sendString(msg);
         } catch (Exception e) {

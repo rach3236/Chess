@@ -28,7 +28,7 @@ public class ChessClient implements NotificationHandler {
     //highlighting square color combo
     //(phase 6)
     private static ArrayList<GameData> gameList;
-    private ChessBoard gameBoardOject;
+    private ChessBoard gameBoardObject;
 
     public ChessClient() throws Exception {
         String serverUrl = "http://localhost:8080";
@@ -67,14 +67,14 @@ public class ChessClient implements NotificationHandler {
         switch (notification.getServerMessageType()) {
             case ServerMessage.ServerMessageType.LOAD_GAME:
                 //TO DO
-                // blahNew = fromJson(notification.getServerMessage, gameState);
+//                 blahNew = fromJson(notification.getServerMessage, gameState);
 //            gameBoardObject = blahNew.gameState();
                 //System.out.println(serverMessage)
 //            drawBoard(gameBoardObject.game(), null, null, null);
                 break;
 
             case ServerMessage.ServerMessageType.ERROR:
-                System.out.println(notification.getServerMessage());
+                System.out.println("Error: " + notification.getServerMessage());
                 break;
 
             case ServerMessage.ServerMessageType.NOTIFICATION:
@@ -91,9 +91,6 @@ public class ChessClient implements NotificationHandler {
                 System.out.println("login <USERNAME> <PASSWORD> - to play chess");
                 System.out.println("quit - playing chess");
                 System.out.println("help - with possible commands");
-                //TO DO
-                var newBoard = new ChessGame();
-                drawBoard(newBoard.getBoard(), "BLACK", null, null);
                 break;
 
             case "quit":
@@ -193,7 +190,6 @@ public class ChessClient implements NotificationHandler {
 
                     //move player to game play UI
                     webSocketServer.connect(helper.authKey, playerInfo.gameID(), false);
-                    //TO DO fix whatever's wrong here haha
                     gamePlayUI(helper, gameList.get(ind - 1).gameID());
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
@@ -210,8 +206,11 @@ public class ChessClient implements NotificationHandler {
                         System.out.println(observeCheckResponse);
                         return true;
                     }
+
                     int ind = Integer.parseInt(arguments[1]);
-                    int gameID = gameList.get(ind - 1).gameID();
+                    //move player to game play UI
+                    webSocketServer.connect(helper.authKey, gameList.get(ind - 1).gameID(), true);
+                    gamePlayUI(helper, gameList.get(ind - 1).gameID());
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                     return true;
@@ -250,7 +249,7 @@ public class ChessClient implements NotificationHandler {
 
             boolean activeGame = true;
 
-            System.out.print("[LOGGED_IN] >>> ");
+            System.out.print("[GAME_PLAY] >>> ");
             Scanner scanner = new Scanner(System.in);
             String line = scanner.nextLine();
             var arguments = line.split(" ");

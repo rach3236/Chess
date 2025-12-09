@@ -45,10 +45,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             System.out.println("blah: " + command.getCommandType());
             //TO DO
             switch (command.getCommandType()) {
-//                case CONNECT -> connect(ctx.session,  new Gson().fromJson(ctx.message(), ConnectGameCommand.class));
-//                case MAKE_MOVE -> makeMove(ctx.session,  new Gson().fromJson(ctx.message(), MakeMoveGameCommand.class));
-//                case LEAVE -> leave(ctx.session, command);
-//                case RESIGN -> resign(ctx.session, command);
+                case CONNECT -> connect(ctx.session,  new Gson().fromJson(ctx.message(), ConnectGameCommand.class));
+                case MAKE_MOVE -> makeMove(ctx.session,  new Gson().fromJson(ctx.message(), MakeMoveGameCommand.class));
+                case LEAVE -> leave(ctx.session, command);
+                case RESIGN -> resign(ctx.session, command);
             }
         } catch (Exception ex) {
             //TO DO
@@ -68,19 +68,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var playerName = userService.getUsername(command.getAuthToken());
 
         //TO DO
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, "hello");
-
-        if (command.observerStatus()) {
-            //TO DO
-//             connections.broadcast("Observer joined the game");
-
-        } else {
-            connections.broadcast(session, command, notification);
-//             connections.broadcast("%s joined the game as " + PlayerColor  + "");
-            //serverMessage.messageType
-        }
-        //connections.broadcast(Load_game_server_message);
-
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, playerName + " has connected " +
+                (command.observerStatus() ? "as observer" : "as " +  "TO DO"));
+        connections.broadcast(session, command, notification);
     }
 
     private void makeMove(Session session, MakeMoveGameCommand command) {

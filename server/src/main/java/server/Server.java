@@ -2,10 +2,6 @@ package server;
 
 import io.javalin.websocket.*;
 import server.websocket.WebSocketHandler;
-import websocket.commands.UserGameCommand;
-//import websocket.commands.UserGameCommand;ServerMessage;
-import org.eclipse.jetty.websocket.api.Session;
-import org.jetbrains.annotations.NotNull;
 import service.*;
 import com.google.gson.Gson;
 import datamodel.*;
@@ -27,7 +23,7 @@ public class Server {
 
         myServer.ws("/ws", ws -> {
             ws.onConnect(wsHandler);
-//            ws.onMessage(wsHandler);
+            ws.onMessage(wsHandler);
             ws.onClose(wsHandler);
         });
 
