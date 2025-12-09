@@ -100,9 +100,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void leave(Session session, UserGameCommand command) {
         //TO DO
 
+        var playerName = userService.getUsername(command.getAuthToken());
         if (!command.observerStatus()) {
             var gameInfo = userService.getGameState(command.getGameID());
-            var playerName = userService.getUsername(command.getAuthToken());
 
             String whiteUser = gameInfo.whiteUsername();
             String blackUser = gameInfo.blackUsername();
@@ -117,7 +117,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             userService.updatePlayerLeave(gameAfterPlayerLeaves);
         }
 
-        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, "", null, null);
+        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, playerName + " left the game", null, null);
         connections.remove(session);
         connections.broadcast(session, command, notification);
     }
