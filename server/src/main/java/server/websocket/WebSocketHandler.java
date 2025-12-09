@@ -1,7 +1,7 @@
 package server.websocket;
 
 import com.google.gson.Gson;
-import io.javalin.http.Context;
+import datamodel.GameData;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
@@ -16,11 +16,6 @@ import websocket.commands.ConnectGameCommand;
 import websocket.commands.UserGameCommand;
 import websocket.commands.MakeMoveGameCommand;
 import websocket.messages.ServerMessage;
-
-import javax.management.Notification;
-import java.io.IOException;
-
-import static websocket.commands.UserGameCommand.CommandType.*;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
@@ -37,13 +32,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         ctx.enableAutomaticPings();
     }
 
-    //QUESTION FOR THE TAs: jakart vs. jetty? wassup w/ that? how to do broadcast
     @Override
     public void handleMessage(WsMessageContext ctx) throws Exception {
         try {
             UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             System.out.println("blah: " + command.getCommandType());
-            //TO DO
+
             switch (command.getCommandType()) {
                 case CONNECT -> connect(ctx.session,  new Gson().fromJson(ctx.message(), ConnectGameCommand.class));
                 case MAKE_MOVE -> makeMove(ctx.session,  new Gson().fromJson(ctx.message(), MakeMoveGameCommand.class));
@@ -51,7 +45,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case RESIGN -> resign(ctx.session, command);
             }
         } catch (Exception ex) {
-            //TO DO
             throw new Exception(ex.getMessage());
         }
     }
@@ -67,9 +60,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.add(session, command);
         var playerName = userService.getUsername(command.getAuthToken());
 
-        //TO DO
+        var game = userService.getGameState(command.getGameID());
+
+        ServerMessage loadGameNotification = new ServerMessage
+                (ServerMessage.ServerMessageType.LOAD_GAME, "", game.gameObject(), command.getPOV());
+        connections.broadcast(session, command, loadGameNotification);
+
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, playerName + " has connected " +
-                (command.observerStatus() ? "as observer" : "as " +  "TO DO"));
+                (command.observerStatus() ? "as observer" : "as " +  command.getPOV()), null, null);
         connections.broadcast(session, command, notification);
     }
 
@@ -93,17 +91,35 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         // }
         //
 
-        // QUESTION FOR TAs to fight about: horrible instruction my friend,
+        // QUESTION FOR TAs to fight about:
         // what to do when player makes an incorrect move?
+        // server end deals with the logic, gives the client an error message
 
     }
 
     private void leave(Session session, UserGameCommand command) {
         //TO DO
-        // userService.leaveGame(curr_player_color, null)  w/ new gameState
-        // update game data
-        // connections.remove(session);
-        // connections.broadcast(notification that player left);
+
+        if (!command.observerStatus()) {
+            var gameInfo = userService.getGameState(command.getGameID());
+            var playerName = userService.getUsername(command.getAuthToken());
+
+            String whiteUser = gameInfo.whiteUsername();
+            String blackUser = gameInfo.blackUsername();
+
+            if (command.getPOV().equals("WHITE") && gameInfo.whiteUsername() != null && gameInfo.whiteUsername().equals(playerName)) {
+                whiteUser = null;
+            }
+            if (command.getPOV().equals("BLACK") && gameInfo.blackUsername() != null && gameInfo.blackUsername().equals(playerName)) {
+                blackUser = null;
+            }
+            GameData gameAfterPlayerLeaves = new GameData(gameInfo.gameID(), whiteUser, blackUser, gameInfo.gameName(), gameInfo.gameObject());
+            userService.updatePlayerLeave(gameAfterPlayerLeaves);
+        }
+
+        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, "", null, null);
+        connections.remove(session);
+        connections.broadcast(session, command, notification);
     }
 
     private void resign(Session session, UserGameCommand command) {

@@ -16,10 +16,15 @@ public class UserGameCommand {
 
     private final Integer gameID;
 
-    public UserGameCommand(CommandType commandType, String authToken, Integer gameID) {
+    private boolean player;
+    private String pov;
+
+    public UserGameCommand(CommandType commandType, String authToken, Integer gameID, boolean observerStatus, String pov) {
         this.commandType = commandType;
         this.authToken = authToken;
         this.gameID = gameID;
+        this.player = observerStatus;
+        this.pov = pov;
     }
 
     public enum CommandType {
@@ -39,6 +44,14 @@ public class UserGameCommand {
 
     public Integer getGameID() {
         return gameID;
+    }
+
+    public boolean observerStatus() {
+        return player;
+    }
+
+    public String getPOV() {
+        return this.pov;
     }
 
     @Override

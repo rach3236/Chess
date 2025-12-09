@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.*;
 import datamodel.*;
 
@@ -8,7 +9,6 @@ import java.util.UUID;
 public class UserService {
     private DataAccess dataAccess;
     private UserData user;
-    private int gameID = 0;
 
     public void delete() {
         dataAccess.delete();
@@ -119,13 +119,17 @@ public class UserService {
         dataAccess.updateGameData(playerInfo.gameID(), whiteUsername, blackUsername, gameName);
     }
 
-    private void leaveGame() {
+    public void updatePlayerLeave(GameData gameInfo) {
         //TO DO
-//        dataAccess.updateGameData(playerInfo.gameID(), whiteUsername, blackUsername, gameName);
+        dataAccess.updateGameData(gameInfo.gameID(), gameInfo.whiteUsername(), gameInfo.blackUsername(), gameInfo.gameName());
     }
 
     public String getUsername(String auth) {
         return dataAccess.getUsername(auth);
+    }
+
+    public GameData getGameState(int gameID) {
+        return dataAccess.getGameInfo(gameID);
     }
 
     public UserService() {

@@ -49,9 +49,9 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void connect(String authToken, int gameID, boolean observerStatus) throws Exception {
+    public void connect(String authToken, int gameID, boolean observerStatus, String pov) throws Exception {
         try {
-            var command = new ConnectGameCommand(ConnectGameCommand.CommandType.CONNECT, authToken, gameID, observerStatus);
+            var command = new ConnectGameCommand(ConnectGameCommand.CommandType.CONNECT, authToken, gameID, observerStatus, pov);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (Exception ex) {
             throw new Exception(ex.getMessage());
@@ -67,9 +67,9 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    public void leave(String authToken, int gameID) throws Exception {
+    public void leave(String authToken, int gameID, Boolean obsStat, String pov) throws Exception {
         try {
-            var command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
+            var command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID, obsStat, pov);
             System.out.println("What?");
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
             System.out.println("Ok");
