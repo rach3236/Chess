@@ -1,9 +1,10 @@
 package server.websocket;
 
+import com.google.gson.Gson;
 import datamodel.GameID;
+import org.eclipse.jetty.websocket.api.Session;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
-import jakarta.websocket.*;
 
 
 
@@ -25,11 +26,13 @@ public class ConnectionManager {
     public void broadcast(Session session, UserGameCommand command, ServerMessage notification) {
         //compare w/ what the server terminal prints out
         //TO DO
+        System.out.println("HEY");
         System.out.println(notification.getServerMessage());
 
         try {
             //??? TO DO
-            session.getBasicRemote().sendText(notification.getServerMessage());
+            String msg = new Gson().toJson(notification);
+            session.getRemote().sendString(msg);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

@@ -8,7 +8,9 @@ import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
-import jakarta.websocket.*;
+
+import org.eclipse.jetty.websocket.api.Session;
+
 import service.UserService;
 import websocket.commands.ConnectGameCommand;
 import websocket.commands.UserGameCommand;
@@ -66,15 +68,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var playerName = userService.getUsername(command.getAuthToken());
 
         //TO DO
-//        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, "hello");
 
         if (command.observerStatus()) {
             //TO DO
-            // connections.broadcast("Observer joined the game");
+//             connections.broadcast("Observer joined the game");
 
         } else {
-            // connections.broadcast("%s joined the game as " + PlayerColor  + "");
-            //serverMessage.mesageType
+            connections.broadcast(session, command, notification);
+//             connections.broadcast("%s joined the game as " + PlayerColor  + "");
+            //serverMessage.messageType
         }
         //connections.broadcast(Load_game_server_message);
 
@@ -108,13 +111,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void leave(Session session, UserGameCommand command) {
         //TO DO
         // userService.leaveGame(curr_player_color, null)  w/ new gameState
+        // update game data
         // connections.remove(session);
         // connections.broadcast(notification that player left);
     }
 
     private void resign(Session session, UserGameCommand command) {
         //TO DO
-        //marks the game as over
+        // marks the game as over
         // no more moves possible
 
         // Questions TA: bro, what do you do w/ the game state when a player resigns?

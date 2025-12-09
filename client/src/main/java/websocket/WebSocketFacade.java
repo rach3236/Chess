@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 
 public class WebSocketFacade extends Endpoint {
 
+
     Session session;
     NotificationHandler notificationHandler;
 
@@ -38,7 +39,7 @@ public class WebSocketFacade extends Endpoint {
                     notificationHandler.notify(notification);
                 }
             });
-        } catch (DeploymentException | IOException | URISyntaxException ex) {
+        } catch (Exception ex) {
             throw new Exception(ex.getMessage());
         }
     }
@@ -69,7 +70,9 @@ public class WebSocketFacade extends Endpoint {
     public void leave(String authToken, int gameID) throws Exception {
         try {
             var command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
+            System.out.println("What?");
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
+            System.out.println("Ok");
         } catch (Exception ex) {
             throw new Exception(ex.getMessage());
         }
