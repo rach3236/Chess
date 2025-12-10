@@ -16,6 +16,7 @@ public class ChessClient implements NotificationHandler {
 
     private static ChessServerFacade server;
     private static WebSocketFacade webSocketServer;
+    private static ValidationChecks validation;
     private final static String WHITE = "WHITE";
     private final static String BLACK = "BLACK";
     //color combos
@@ -63,7 +64,6 @@ public class ChessClient implements NotificationHandler {
     }
 
     public void notify(ServerMessage notification) {
-
         System.out.println();
         switch (notification.getServerMessageType()) {
             case ServerMessage.ServerMessageType.LOAD_GAME:
@@ -101,7 +101,7 @@ public class ChessClient implements NotificationHandler {
                 return false;
 
             case "login":
-                var checkResult = loginCheck(arguments);
+                var checkResult = validation.loginCheck(arguments);
                 if (checkResult != null) {
                     System.out.println(checkResult);
                     return true;
@@ -118,7 +118,7 @@ public class ChessClient implements NotificationHandler {
                 break;
 
             case "register":
-                var regCheckResult = registerCheck(arguments);
+                var regCheckResult = validation.registerCheck(arguments);
                 if (regCheckResult != null) {
                     System.out.println(regCheckResult);
                     return true;
@@ -143,7 +143,7 @@ public class ChessClient implements NotificationHandler {
     private static boolean postLoginUI(String[] arguments, ArgsHelper helper) {
         switch (arguments[0].toLowerCase()) {
             case "create":
-                var createCheckResponse = createCheck(arguments);
+                var createCheckResponse = validation.createCheck(arguments);
                 if (createCheckResponse != null) {
                     System.out.println(createCheckResponse);
                     break;
@@ -155,7 +155,6 @@ public class ChessClient implements NotificationHandler {
                     var allGamesList = server.listGames(helper.authKey);
                     gameList = allGamesList.games();
                     return true;
-
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
@@ -171,7 +170,7 @@ public class ChessClient implements NotificationHandler {
                         System.out.println((i + 1) + ": " + currGame.gameName() + ", White Player: " +
                                 whitePlayer + ", Black Player: " + blackPlayer);
                     }
-                    System.out.println("List length: " + String.valueOf(gameList.size()));
+                    System.out.println("List length: " + gameList.size());
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
@@ -180,8 +179,7 @@ public class ChessClient implements NotificationHandler {
                 try {
                     int ind = 0;
                     int listLen = gameList.size();
-
-                    var joinCheckResponse = joinCheck(arguments, listLen);
+                    var joinCheckResponse = validation.joinCheck(arguments, listLen);
                     if (joinCheckResponse != null) {
                         System.out.println(joinCheckResponse);
                         return true;
@@ -190,7 +188,6 @@ public class ChessClient implements NotificationHandler {
                     PlayerInfo playerInfo = new PlayerInfo(arguments[2], gameList.get(ind - 1).gameID());
                     server.joinPlayer(playerInfo, helper.authKey);
 
-                    //move player to game play UI
                     webSocketServer.connect(helper.authKey, playerInfo.gameID(), false, arguments[2]);
                     clientPOV = arguments[2];
                     gamePlayUI(helper, gameList.get(ind - 1).gameID(), false, arguments[2]);
@@ -203,15 +200,12 @@ public class ChessClient implements NotificationHandler {
                     var allGamesList = server.listGames(helper.authKey);
                     gameList = allGamesList.games();
                     int listLen = gameList.size();
-
-                    var observeCheckResponse = observeCheck(arguments, listLen);
+                    var observeCheckResponse = validation.observeCheck(arguments, listLen);
                     if (observeCheckResponse != null) {
                         System.out.println(observeCheckResponse);
                         return true;
                     }
-
                     int ind = Integer.parseInt(arguments[1]);
-                    //move player to game play UI
                     webSocketServer.connect(helper.authKey, gameList.get(ind - 1).gameID(), true, "WHITE");
                     gamePlayUI(helper, gameList.get(ind - 1).gameID(), true, "WHITE");
                 } catch (Exception e) {
@@ -272,7 +266,7 @@ public class ChessClient implements NotificationHandler {
                             """);
                     break;
                 case "redraw":
-                    var checkRedrawArgs = checkRedraw(arguments);
+                    var checkRedrawArgs = validation.checkRedraw(arguments);
                     if (checkRedrawArgs != null) {System.out.println(checkRedrawArgs); break;}
                        drawBoard(gameBoardObject, pov, new ArrayList<>(), new ChessPosition(0, 0));
                     break;
@@ -282,7 +276,7 @@ public class ChessClient implements NotificationHandler {
                         break;
                     }
 
-                    var checkMoveArgs = checkMakeMove(arguments);
+                    var checkMoveArgs = validation.checkMakeMove(arguments);
                     if (checkMoveArgs != null) {System.out.println(checkMoveArgs); break;}
 
                     var startPos = new ChessPosition(Integer.parseInt(arguments[1].substring(1,2)), columnTranslator(arguments[1].substring(0,1)));
@@ -297,7 +291,7 @@ public class ChessClient implements NotificationHandler {
                     }
                     break;
                 case "leave":
-                    var checkLeaveArgs = checkLeave(arguments);
+                    var checkLeaveArgs = validation.checkLeave(arguments);
                     if (checkLeaveArgs != null) {System.out.println(checkLeaveArgs); break;}
 
                     try {
@@ -309,7 +303,7 @@ public class ChessClient implements NotificationHandler {
                     }
                     return;
                 case "resign":
-                    var checkResignArgs = checkResign(arguments);
+                    var checkResignArgs = validation.checkResign(arguments);
                     if (checkResignArgs != null) {System.out.println(checkResignArgs); break;}
 
                     System.out.println("Do you really want to resign?👀 ('y'/'n') >>> ");
@@ -327,23 +321,20 @@ public class ChessClient implements NotificationHandler {
 
                     break;
                 case "highlight":
-                    var checkHighlightResponse = checkHighlight(arguments);
+                    var checkHighlightResponse = validation.checkHighlight(arguments);
                     if (checkHighlightResponse != null) {System.out.println(checkHighlightResponse); break;}
 
-                    ChessPosition highlightPos = new ChessPosition(Integer.parseInt(arguments[1].substring(1,2)), columnTranslator(arguments[1].substring(0,1)));
+                    ChessPosition highlightPos = new ChessPosition(Integer.parseInt(arguments[1].substring(1,2)),
+                            columnTranslator(arguments[1].substring(0,1)));
 
                     var movesList = gameBoardGame.validMoves(highlightPos);
 
                     drawBoard(gameBoardObject, pov, movesList, highlightPos);
-
                     break;
-
-
                 default:
                     System.out.println("Not a valid command. Please type 'help' for options");
                     return;
             }
-
         }
     }
 
@@ -386,9 +377,8 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
-    private static void printBoardForWhite(ChessBoard board, String columns, ArrayList<String> rows, Collection<ChessMove> moves, ChessPosition currPos) {
-
-
+    private static void printBoardForWhite(ChessBoard board, String columns, ArrayList<String> rows,
+                                           Collection<ChessMove> moves, ChessPosition currPos) {
         for (int i = 0; i < 10; i++) {
             if (i == 0 || i == 9) {
                 System.out.println(BLACKONGRAY + columns + RESET);
@@ -407,7 +397,8 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
-    private static void printBoardForBlack(ChessBoard board, String columns, ArrayList<String> rows, Collection<ChessMove> moves, ChessPosition currPos) {
+    private static void printBoardForBlack(ChessBoard board, String columns, ArrayList<String> rows,
+                                           Collection<ChessMove> moves, ChessPosition currPos) {
         for (int i = 9; i >= 0; i--) {
             if (i == 0 || i == 9) {
                 System.out.println(BLACKONGRAY + columns + RESET);
@@ -427,11 +418,6 @@ public class ChessClient implements NotificationHandler {
     }
 
     private static String colorHelper(ChessPosition position, ChessBoard board, Collection<ChessMove> moves, ChessPosition startPos) {
-        // green is 42
-        // light green is 102
-        //black foregr is 30
-        // yellow is 103
-//        if (position)
 
         String color = "\u001b[";
         var piece = board.getPiece(position);
@@ -493,228 +479,5 @@ public class ChessClient implements NotificationHandler {
             default:
                 return " ";
         }
-    }
-
-
-    private static String loginCheck(String[] inputs) {
-//        System.out.println("login <USERNAME> <PASSWORD> - to play chess");
-        if (inputs.length < 3) {
-            return """
-                    Oh no! Looks like we don't have enough the username AND password🤭
-                    Please make sure to format your input like this:
-                    --->'login <USERNAME> <PASSWORD>'
-                    """;
-
-        } else if (inputs.length > 3) {
-            return "Oh no! Looks like you put in too many" + RESET + "inputs:)" +
-                    "\nPlease make sure to format your input like this: " +
-                    "\n     'login <USERNAME> <PASSWORD>'";
-        }
-        return null;
-    }
-
-    private static String registerCheck(String[] inputs) {
-        if (inputs.length < 4) {
-            return """
-                    Oh no! Looks like we're missing a username, password, or email!\
-                    
-                    Please make sure you format your input like this: \
-                    
-                    'register <USERNAME> <PASSWORD> <EMAIL>'""";
-        } else if (inputs.length > 4) {
-            return "Oh no! Looks like you put in too many" + RESET + "inputs:)" +
-                    "\nPlease make sure to format your input like this: " +
-                    "\n      'register <USERNAME> <PASSWORD> <EMAIL>'";
-        }
-        return null;
-    }
-
-    private static String createCheck(String[] inputs) {
-        if (inputs.length < 2) {
-            return """
-                     Oh no! Looks like you're missing the name of the game:)\
-                                    \s
-                     What would you like to name the game?\
-                    \s
-                     Please format your input like this: \
-                    \s
-                         'create <GAME NAME>'""";
-        } else if (inputs.length > 2) {
-            return "Oh no! Looks like you have too many" + RESET + "inputs:)" +
-                    "\n Please format your input like this: " +
-                    "\n    'create <GAME NAME>'";
-        }
-        return null;
-    }
-
-    private static String joinCheck(String[] inputs, int listLen) {
-//        System.out.println("join <ID> [WHITE|BLACK] - a game");
-
-        //check arg lengths
-        if (inputs.length < 3) {
-            return """
-                    Oh no! Looks like you're missing something:)
-                    Please format your input like this:
-                        'join <ID> [WHITE|BLACK]'
-                    """;
-        } else if (inputs.length > 3) {
-            return "Oh no! Looks like you have too many" + RESET + "inputs:)" +
-                    "\n Please format your input like this: " +
-                    "\n    'join <ID> [WHITE|BLACK]'";
-        }
-        //check order of args
-        if (inputs[1].equals("WHITE") || inputs[1].equals("BLACK")) {
-            return """
-                    Oh no! Looks like your arguments got mixed up.
-                    Please format your input like this:
-                        'join <ID> [WHITE|BLACK]'
-                    """;
-        } else if (!inputs[2].equals("WHITE") && !inputs[2].equals("BLACK")) {
-            return """
-                    Oh no! Looks like your arguments got mixed up.
-                    Please format your input like this:
-                        'join <ID> [WHITE|BLACK]'
-                    """;
-        }
-        //check game number is valid
-        if (checkGameNumber(inputs, listLen) != null) {
-            return checkGameNumber(inputs, listLen);
-        }
-
-        return null;
-    }
-
-    private static String observeCheck(String[] inputs, int listLen) {
-
-        if (inputs.length < 2) {
-            return """
-                    Oh no! Looks like you're missing the game number:)
-                    Please format your input like this:
-                    --->'observe <GAME NUMBER>'
-                    """;
-        } else if (inputs.length > 2) {
-            return """
-                    Oh no! Looks like you have too many inputs:)
-                    Please format your input like this:
-                    --->'observe <GAME NUMBER>'
-                    """;
-        }
-        //check game number is valid
-        if (checkGameNumber(inputs, listLen) != null) {
-            return checkGameNumber(inputs, listLen);
-        }
-
-        return null;
-    }
-
-    private static String checkGameNumber(String[] inputs, int listLen) {
-        int ind = 0;
-        try {
-            ind = Integer.parseInt(inputs[1]);
-        } catch (NumberFormatException e) {
-            System.out.println("Game Number was not a valid integer. Please pass in a valid integer.");
-            System.out.println("""
-                    Please format your input like this:
-                    --->'join <ID> [WHITE|BLACK]'
-                    """);
-        }
-
-        ind = Integer.parseInt(inputs[1]);
-        if (ind > listLen || ind < 1) {
-            return """
-                    Oh no! Looks like that game doesn't exist:)
-                    Please enter a valid game number with your query:
-                    """;
-        }
-
-        return null;
-    }
-
-    private static String checkRedraw(String[] inputs) {
-
-        if (inputs.length > 2) {
-            return "Oh no! Looks like you have too many" + RESET + "inputs:)" +
-                    "\n Please format your input like this: " +
-                    "\n--->'redraw'";
-        }
-        return null;
-    }
-
-    private static String checkMakeMove(String[] inputs) {
-
-        if (inputs.length > 3) {
-            return "Oh no! Looks like you have too many" + RESET + "inputs:)" +
-                    "\n Please format your input like this: " +
-                    "\n--->'make_move <START POSITION> <END POSITION>'";
-        } else if (inputs.length < 3) {
-            return """
-                    Oh no! Looks like you're missing a field:)
-                    Please format your input like this:
-                    --->'make_move <START POSITION> <END POSITION>'
-                    """;
-        }
-
-        if (!inputs[1].matches("[a-h][1-8]")) {
-            return """
-                    Wait a second, your first move doesn't look like a valid move🤔
-                    Please format your moves as a letter and number, like this: a5, b3, h6, d1, f7
-                    """;
-        } else if (!inputs[2].matches("[a-h][1-8]")) {
-            return """
-                    Wait a second, your second move doesn't look like a valid move🤔
-                    Please format your moves as a letter and number, like this: a5, b3, h6, d1, f7
-                    """;
-        }
-        return null;
-    }
-
-    private static String checkLeave(String[] inputs) {
-        if (inputs.length > 2) {
-            return """
-                    Oh no! Looks like you have too many inputs:)\
-                    
-                     Please format your input like this: \
-                    
-                    --->'leave'""";
-        }
-        return null;
-    }
-
-    private static String checkResign(String[] inputs) {
-        if (inputs.length > 2) {
-            return """
-                    Oh no! Looks like you have too many inputs:)\
-                    
-                     Please format your input like this: \
-                    
-                    --->'resign'""";
-        }
-        return null;
-    }
-
-    private static String checkHighlight(String[] inputs) {
-        if (inputs.length > 2) {
-            return """ 
-                    Oh no! Looks like ou have too many inputs:)
-                    Please format your input like this:
-                    ---->'highlight <CHESS POSITION>'
-                    """;
-        } else if (inputs.length < 2) {
-            return """ 
-                    Oh no! Looks like you have too few inputs:)
-                    Please format your input like this:
-                    ---->'highlight <CHESS POSITION>'
-                    """;
-        }
-
-
-
-        if (!inputs[1].matches("[a-h][1-8]")) {
-            return """
-                    Wait a second, your first move doesn't look like a valid position🤔
-                    Please format your position as a letter and number, like this: a5, b3, h6, d1, f7
-                    """;
-        }
-        return null;
     }
 }

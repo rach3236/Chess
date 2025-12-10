@@ -63,14 +63,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.add(session, command);
         var playerName = userService.getUsername(command.getAuthToken());
         if (playerName == null) {
-            ServerMessage errorNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "user doesn't exist",  null, null);
+            ServerMessage errorNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR),
+                    null, "user doesn't exist",  null, null);
             connections.selfBroadcast(session, command, errorNotification);
             return;
         }
 
         var game = userService.getGameState(command.getGameID());
         if (game == null) {
-            ServerMessage errorNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "Game is null", null, null);
+            ServerMessage errorNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR),
+                    null, "Game is null", null, null);
             connections.selfBroadcast(session, command, errorNotification);
             return;
         }
@@ -90,20 +92,23 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var gameState = userService.getGameState(command.getGameID());
 
         if (gameState == null) {
-            ServerMessage errorNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "Error: invalid game ID", null, null);
+            ServerMessage errorNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR),
+                    null, "Error: invalid game ID", null, null);
             connections.selfBroadcast(session, command, errorNotification);
             return;
         }
 
         if (!gameState.gameObject().getActiveGame()) {
-            ServerMessage notActiveNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "No more moves can be made; the game is complete!",   null, null);
+            ServerMessage notActiveNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR),
+                    null, "No more moves can be made; the game is complete!",   null, null);
             connections.selfBroadcast(session, command, notActiveNotification);
             return;
         }
         String pov = "WHITE";
         var playerName = userService.getUsername(command.getAuthToken());
         if (playerName == null) {
-            ServerMessage badAuthNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "Bad request for username", null, null);
+            ServerMessage badAuthNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR),
+                    null, "Bad request for username", null, null);
             connections.selfBroadcast(session, command, badAuthNotification);
             return;
         }
@@ -172,11 +177,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     connections.everybodyBroadcast(command, staleMateNotification);
                 }
             } catch (Exception e) {
-                ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, "Error: " + e.getMessage(), null, pov);
+                ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null,
+                        "Error: " + e.getMessage(), null, pov);
                 connections.selfBroadcast(session, command, errorMessage);
             }
         } else {
-            ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, "Error: Invalid move", null, pov);
+            ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null,
+                    "Error: Invalid move", null, pov);
             connections.selfBroadcast(session, command, errorMessage);
         }
     }
@@ -207,7 +214,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         if (!command.observerStatus()) {
             var gameInfo = userService.getGameState(command.getGameID());
             if (gameInfo == null) {
-                ServerMessage errorNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "Invalid Game ID", null, null);
+                ServerMessage errorNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR),
+                        null, "Invalid Game ID", null, null);
                 connections.selfBroadcast(session, command, errorNotification);
                 return;
             }
@@ -226,7 +234,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             userService.updateGameInfo(gameAfterPlayerLeaves);
         }
 
-        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, playerName + " left the game", null, null, null);
+        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                playerName + " left the game", null, null, null);
         connections.remove(session, gameID);
         connections.otherPeopleBroadcast(session, command, notification);
     }
@@ -244,26 +253,30 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
 
         if (observerStatus) {
-            ServerMessage errorMessage = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "Observers cannot resign", null, null);
+            ServerMessage errorMessage = new ServerMessage((ServerMessage.ServerMessageType.ERROR),
+                    null, "Observers cannot resign", null, null);
             connections.selfBroadcast(session, command, errorMessage);
             return;
         }
 
         if (!gameState.gameObject().getActiveGame()) {
-            ServerMessage notActiveNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "No more moves can be made; the game is complete!", null, null);
+            ServerMessage notActiveNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR),
+                    null, "No more moves can be made; the game is complete!", null, null);
             connections.selfBroadcast(session, command, notActiveNotification);
             return;
         }
 
         if (playerName == null) {
-            ServerMessage badAuthNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "Bad request for username", null, null);
+            ServerMessage badAuthNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR),
+                    null, "Bad request for username", null, null);
             connections.selfBroadcast(session, command, badAuthNotification);
             return;
         }
         gameState.gameObject().setActiveGame(false);
         userService.updateGameInfo(gameState);
 
-        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, playerName + " has resigned. ", null, null, null);
+        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                playerName + " has resigned. ", null, null, null);
         connections.everybodyBroadcast(command, notification);
     }
 }

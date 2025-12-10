@@ -295,11 +295,6 @@ public class ChessGame {
         return false;
     }
 
-    //TO DO
-    public boolean checkSubmittedMoves(){
-        return false;
-    }
-
     /**
      * Sets this game's chessboard with a given board
      *
