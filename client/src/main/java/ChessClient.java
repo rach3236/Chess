@@ -21,15 +21,13 @@ public class ChessClient implements NotificationHandler {
     //color combos
     public static final String RESET = "\u001b[0m";
     public static final String BLACKONGRAY = "\u001b[30;47;1m";
-    public static final String REDONWHITE = "\u001b[35;107;1m";
     public static final String REDONBLACK = "\u001b[35;40;1m";
-    public static final String BLUEONWHITE = "\u001b[34;107;1m";
-    public static final String BLUEONBLACK = "\u001b[34;40;1m";
     //highlighting square color combo
     //(phase 6)
     private static ArrayList<GameData> gameList;
     private static ChessGame gameBoardGame;
     private static ChessBoard gameBoardObject;
+    private static String clientPOV;
 
     public ChessClient() throws Exception {
         String serverUrl = "http://localhost:8080";
@@ -42,6 +40,7 @@ public class ChessClient implements NotificationHandler {
         helper.loggedStatus = false;
         gameBoardGame = new ChessGame();
         gameBoardObject = new ChessGame().getBoard();
+        clientPOV = "WHITE";
 
         while (true) {
 
@@ -68,12 +67,17 @@ public class ChessClient implements NotificationHandler {
         System.out.println();
         switch (notification.getServerMessageType()) {
             case ServerMessage.ServerMessageType.LOAD_GAME:
-               drawBoard(notification.getGame().getBoard(), notification.getPOV(), new ArrayList<>(), new ChessPosition(0,0));
+               drawBoard(notification.getGame().getBoard(), clientPOV, new ArrayList<>(), new ChessPosition(0,0));
                gameBoardObject = notification.getGame().getBoard();
                 System.out.print("[GAME_PLAY] >>> ");
                break;
 
-            case ServerMessage.ServerMessageType.ERROR, ServerMessage.ServerMessageType.NOTIFICATION:
+            case ServerMessage.ServerMessageType.ERROR:
+                System.out.println(REDONBLACK + notification.getErrorMessage() + RESET);
+                System.out.print("[GAME_PLAY] >>> ");
+                break;
+
+            case ServerMessage.ServerMessageType.NOTIFICATION:
                 System.out.println(REDONBLACK + notification.getServerMessage() + RESET);
                 System.out.print("[GAME_PLAY] >>> ");
                 break;
@@ -187,6 +191,7 @@ public class ChessClient implements NotificationHandler {
 
                     //move player to game play UI
                     webSocketServer.connect(helper.authKey, playerInfo.gameID(), false, arguments[2]);
+                    clientPOV = arguments[2];
                     gamePlayUI(helper, gameList.get(ind - 1).gameID(), false, arguments[2]);
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
@@ -297,6 +302,7 @@ public class ChessClient implements NotificationHandler {
 
                     try {
                         webSocketServer.leave(helper.authKey, gameID, observerStatus, pov);
+                        clientPOV = "WHITE";
                         return;
                     } catch (Exception e) {
                         System.out.println(e.getMessage());
