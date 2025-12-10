@@ -64,20 +64,18 @@ public class ChessClient implements NotificationHandler {
     }
 
     public void notify(ServerMessage notification) {
-        System.out.println(REDONBLACK + notification.getServerMessage() + RESET);
 
+        System.out.println();
         switch (notification.getServerMessageType()) {
             case ServerMessage.ServerMessageType.LOAD_GAME:
                drawBoard(notification.getGame().getBoard(), notification.getPOV(), new ArrayList<>(), new ChessPosition(0,0));
                gameBoardObject = notification.getGame().getBoard();
+                System.out.print("[GAME_PLAY] >>> ");
                break;
 
-            case ServerMessage.ServerMessageType.ERROR:
-                System.out.println("Error: " + notification.getServerMessage());
-                break;
-
-            case ServerMessage.ServerMessageType.NOTIFICATION:
-                System.out.println(notification.getServerMessage());
+            case ServerMessage.ServerMessageType.ERROR, ServerMessage.ServerMessageType.NOTIFICATION:
+                System.out.println(REDONBLACK + notification.getServerMessage() + RESET);
+                System.out.print("[GAME_PLAY] >>> ");
                 break;
         }
     }
@@ -333,11 +331,6 @@ public class ChessClient implements NotificationHandler {
                     var movesList = gameBoardGame.validMoves(highlightPos);
 
                     drawBoard(gameBoardObject, pov, movesList, highlightPos);
-                    //TO DO:
-                    // allows user to input piece for which they want legal moves
-                    // get possible moves (pieceMoves in ChessPiece.java, takes a board and a current position)
-                    // display possible moves, drawBoard(gameState, pov, validMoves, ChessPosition)
-                    // @override ? draw board w/ possible moves highlighted (pass in gameState & possMoves)
 
                     break;
 

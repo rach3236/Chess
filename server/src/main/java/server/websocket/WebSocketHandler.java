@@ -103,7 +103,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 var playerName = userService.getUsername(command.getAuthToken());
 
                 ServerMessage moveNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                        (playerName + "moved from " + startPosLetter + startPos.getRow() + " to " + endPosLetter + endPos.getRow()),
+                        (playerName + " moved from " + startPosLetter + startPos.getRow() + " to " + endPosLetter + endPos.getRow()),
                         gameState.gameObject(), command.getPOV());
 
                 connections.broadcast(session, command, moveNotification, false);
