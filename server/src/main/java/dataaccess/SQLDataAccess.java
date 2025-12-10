@@ -98,8 +98,8 @@ public class SQLDataAccess implements DataAccess {
     }
 
     @Override
-    public void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName) {
-        DatabaseManager.updateGameData(gameID, whiteUsername, blackUsername, gameName);
+    public void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame gameObject) {
+        DatabaseManager.updateGameData(gameID, whiteUsername, blackUsername, gameName, gameObject);
     }
 
     public int getGameID() {

@@ -1,13 +1,11 @@
 package server.websocket;
 
 import com.google.gson.Gson;
-import datamodel.GameID;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
-
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,7 +16,8 @@ public class ConnectionManager {
 
     public void add(Session session, UserGameCommand command) {
         if (!connections.containsKey(command.getGameID())) {
-            Set<Session> seshList = Set.of(session);
+            Set<Session> seshList = new HashSet<>();
+            seshList.add(session);
             connections.put(command.getGameID(), seshList);
         } else {
             var seshList = connections.get(command.getGameID());
@@ -26,46 +25,30 @@ public class ConnectionManager {
         }
     }
 
-    public void remove(Session session, UserGameCommand command, ServerMessage notification) {
-        var sessionsList = connections.get(command.getGameID());
-        sessionsList.remove(session);
+    public void remove(Session session, int gameID) {
+        var sessionsList = connections.get(gameID);
+        if (sessionsList != null) {
+            sessionsList.remove(session);
+        }
     }
 
-    public void broadcast(Session session, UserGameCommand command, ServerMessage notification) {
-        //compare w/ what the server terminal prints out
-        //TO DO
-        System.out.println("broadcast example");
-
+    public void broadcast(Session session, UserGameCommand command, ServerMessage notification, boolean allUsers) {
         try {
-            //??? TO DO filter who we broadcast to.
-            //TO DO loop through connections
-            if ((command.getCommandType()== UserGameCommand.CommandType.CONNECT) || command.getCommandType() == UserGameCommand.CommandType.LEAVE) {
-
-                var sessionsList = connections.get(command.getGameID());
-                for (Session sesh : sessionsList) {
-                    // TO DO check to see if player color/session is the same as this call
-                    if (sesh == session) {
-                        continue;
-                    }
+            var sessionsList = connections.get(command.getGameID());
+            for (Session sesh : sessionsList) {
+                if (notification.getServerMessageType() == ServerMessage.ServerMessageType.ERROR && sesh == session) {
                     String msg = new Gson().toJson(notification);
                     sesh.getRemote().sendString(msg);
+                    return;
                 }
-
+                if (!allUsers && sesh == session) {
+                    continue;
+                }
+                String msg = new Gson().toJson(notification);
+                sesh.getRemote().sendString(msg);
             }
-
-            String msg = new Gson().toJson(notification);
-            session.getRemote().sendString(msg);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-
     }
-
-
-
-
-
-
-
-
 }

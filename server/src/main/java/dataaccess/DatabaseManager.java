@@ -335,17 +335,20 @@ public class DatabaseManager {
         return username != null ? "(SELECT userDataID FROM UserData WHERE Username='" + username + "')" : "Null";
     }
 
-    public static void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName) {
+    public static void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame gameObject) {
         try (Connection conn = DatabaseManager.getConnection()) {
+            var serializer = new Gson();
             var statement = "UPDATE GameData " +
                     "SET whiteUserDataID = " + addUserCheck(whiteUsername)  + " , " +
                     " blackUserDataID = " + addUserCheck(blackUsername) + " , " +
-                    "gameName=? " +
+                    "gameName=? " + " , " +
+                    "json=?" +
                     "WHERE gameID=?;";
 
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, gameName);
-                ps.setInt(2, gameID);
+                ps.setString(2, serializer.toJson(gameObject));
+                ps.setInt(3, gameID);
                 ps.executeUpdate();
             } catch (Exception e) {
                 throw new InternalServerException("Error updating game data to join", e);

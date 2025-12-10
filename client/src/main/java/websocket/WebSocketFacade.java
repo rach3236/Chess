@@ -64,9 +64,7 @@ public class WebSocketFacade extends Endpoint {
     public void leave(String authToken, int gameID, Boolean obsStat, String pov) throws Exception {
         try {
             var command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID, obsStat, pov, null);
-            System.out.println("What?");
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
-            System.out.println("Ok");
         } catch (Exception ex) {
             throw new Exception(ex.getMessage());
         }

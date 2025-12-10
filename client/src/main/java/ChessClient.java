@@ -27,7 +27,7 @@ public class ChessClient implements NotificationHandler {
     //highlighting square color combo
     //(phase 6)
     private static ArrayList<GameData> gameList;
-    private ChessBoard gameBoardObject;
+    private static ChessBoard gameBoardObject;
 
     public ChessClient() throws Exception {
         String serverUrl = "http://localhost:8080";
@@ -38,6 +38,7 @@ public class ChessClient implements NotificationHandler {
 
         var helper = new ArgsHelper();
         helper.loggedStatus = false;
+        gameBoardObject = new ChessGame().getBoard();
 
         while (true) {
 
@@ -64,9 +65,8 @@ public class ChessClient implements NotificationHandler {
 
         switch (notification.getServerMessageType()) {
             case ServerMessage.ServerMessageType.LOAD_GAME:
-                System.out.println("test for load game notification");
-                System.out.println("load game checkpoint 1");
                drawBoard(notification.getGame().getBoard(), notification.getPOV(), null, null);
+               gameBoardObject = notification.getGame().getBoard();
                break;
 
             case ServerMessage.ServerMessageType.ERROR:
@@ -267,9 +267,8 @@ public class ChessClient implements NotificationHandler {
                 case "redraw":
                     var checkRedrawArgs = checkRedraw(arguments);
                     if (checkRedrawArgs != null) {System.out.println(checkRedrawArgs); break;}
-                    //TO DO
-//                    get game state
-//                    drawBoard(gameBoardObject);
+
+                    drawBoard(gameBoardObject, pov, null, null);
                     break;
                 case "make_move":
                     if (!activeGame) {
@@ -279,10 +278,19 @@ public class ChessClient implements NotificationHandler {
 
                     var checkMoveArgs = checkMakeMove(arguments);
                     if (checkMoveArgs != null) {System.out.println(checkMoveArgs); break;}
-                    //TO DO
-                    //handle move check on server end
-                    //send in move, catch exception and print user friendly error
+                    //interpret move
+                    //if white, a is ro2=1
+                    //expected user arguments: make_move a4 a5
+                    var startPos = new ChessPosition(Integer.parseInt(arguments[1].substring(1,2)), columnTranslator(arguments[1].substring(0,1)));
+                    var endPos = new ChessPosition(Integer.parseInt(arguments[2].substring(1,2)), columnTranslator(arguments[2].substring(0,1)));
 
+                    var move = new ChessMove(startPos, endPos, null);
+
+                    try {
+                        webSocketServer.makeMove(helper.authKey, gameID, false, pov, move);
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
                     break;
                 case "leave":
                     var checkLeaveArgs = checkLeave(arguments);
@@ -305,12 +313,13 @@ public class ChessClient implements NotificationHandler {
                     if (line.equals("y")) {
                         try {
 
-                            //TO DO figure out whether or not to pass inn pov or figure it out on the server end
-                            webSocketServer.resign(helper.authKey, gameID, false, null);
+                            //TO DO figure out whether to pass inn pov or figure it out on the server end
+                            webSocketServer.resign(helper.authKey, gameID, false, pov);
                             break;
                         } catch (Exception e) {
                             System.out.println(e.getMessage());
                         }
+
                     }
 
                     break;
@@ -332,6 +341,29 @@ public class ChessClient implements NotificationHandler {
                     return;
             }
 
+        }
+    }
+
+    private static int columnTranslator(String letter) {
+        switch (letter) {
+            case "a":
+                return 1;
+            case "b":
+                return 2;
+            case "c":
+                return 3;
+            case "d":
+                return 4;
+            case "e":
+                return 5;
+            case "f":
+                return 6;
+            case "g":
+                return 7;
+            case "h":
+                return 8;
+            default:
+                return -1;
         }
     }
 
@@ -561,12 +593,6 @@ public class ChessClient implements NotificationHandler {
 
         return null;
     }
-
-//    List of possible commands:
-//
-//            'help' - displays possible commands
-//                            'resign' - resign from current game, other player wins
-//                            'highlight_legal_moves <CHESS PIECE POSITION>' - see current possible moves to make as displayed on the board
 
     private static String checkRedraw(String[] inputs) {
 

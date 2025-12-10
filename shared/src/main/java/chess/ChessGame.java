@@ -21,6 +21,7 @@ public class ChessGame {
         this.team = TeamColor.WHITE;
     }
 
+
     public ChessBoard copyBoard() {
         ChessBoard newBoard = new ChessBoard();
         for (int i = 1; i < 9; i++) {
@@ -145,7 +146,7 @@ public class ChessGame {
         if (piece == null) {
             throw new InvalidMoveException();
         } else if (piece.getTeamColor() != getTeamTurn()) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("It's not your turn anymore:)");
         } else if (validMoves(move.getStartPosition()).contains(move)) {
             if (move.getPromotionPiece() != null) {
                 ChessPiece promoPiece = new ChessPiece(piece.getTeamColor(), ChessPiece.PieceType.PAWN);

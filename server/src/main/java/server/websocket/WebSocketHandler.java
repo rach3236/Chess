@@ -1,5 +1,7 @@
 package server.websocket;
 
+import chess.ChessGame;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import datamodel.GameData;
 import io.javalin.websocket.WsCloseContext;
@@ -18,6 +20,7 @@ import websocket.messages.ServerMessage;
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
     private static UserService userService;
+    private int gameID;
     public WebSocketHandler(UserService uService) {
         this.userService = uService;
     }
@@ -43,6 +46,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case RESIGN -> resign(ctx.session, command);
             }
         } catch (Exception ex) {
+            System.out.println("System exception " + ex.getMessage());
             throw new Exception(ex.getMessage());
         }
     }
@@ -51,7 +55,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void handleClose(WsCloseContext ctx) {
         System.out.println("Websocket closed");
         //TO DO
-//        connections.remove(ctx.session);
+        connections.remove(ctx.session, gameID);
     }
 
     private void connect(Session session, UserGameCommand command) throws Exception {
@@ -60,39 +64,96 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         var game = userService.getGameState(command.getGameID());
 
-        ServerMessage loadGameNotification = new ServerMessage
-                (ServerMessage.ServerMessageType.LOAD_GAME, "", game.gameObject(), command.getPOV());
-        connections.broadcast(session, command, loadGameNotification);
+        gameID = command.getGameID();
 
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, playerName + " has connected " +
-                (command.observerStatus() ? "as observer" : "as " +  command.getPOV()), null, null);
-        connections.broadcast(session, command, notification);
+                (command.observerStatus() ? "as observer" : "as " + command.getPOV()), null, command.getPOV());
+        connections.broadcast(session, command, notification, false);
+
+        ServerMessage loadGameNotification = new ServerMessage
+                (ServerMessage.ServerMessageType.LOAD_GAME, "", game.gameObject(), command.getPOV());
+        connections.broadcast(session, command, loadGameNotification, true);
+
     }
 
     private void makeMove(Session session, UserGameCommand command) {
         //TO DO
-    // userService.validateMove(gameID, playerColor, move);
-        // if (validMove) {
-        //      updateGameData w/ new game state
-        //      connections.broadcast(loadGame)
-        //      connections.broadcast(notification: playerColor "moved from " + startPosition + " to " + endPosition)
-        //      if (move -> check/checkmate) {
-        //          connections.broadcast(CHECK)
-//              } else if (move -> checkmate) {
-//                    connections.broadcast(CHECKMATE);
-//                } else if (move -> stalemate) {
-//                  connections.broadcast(STALEMATE);
-//                }
-        //
-        // } else {
-        //    connections.broadcast(Error: bad move sonny)
-        // }
-        //
+        var gameState = userService.getGameState(command.getGameID());
+        var validMove = userService.checkValidMove(command.getMove(), command.getGameID(), command.getPOV());
+        if (validMove) {
+            try {
+                gameState.gameObject().makeMove(command.getMove());
+                userService.updateGameInfo(gameState);
 
-        // QUESTION FOR TAs to fight about:
-        // what to do when player makes an incorrect move?
-        // server end deals with the logic, gives the client an error message
+                ServerMessage loadGameNotification = new ServerMessage
+                        (ServerMessage.ServerMessageType.LOAD_GAME, "", gameState.gameObject(), command.getPOV());
+                connections.broadcast(session, command, loadGameNotification, true);
 
+                //broadcast move
+                var startPos = command.getMove().getStartPosition();
+                var endPos = command.getMove().getEndPosition();
+
+                String startPosLetter = translatorHelper(startPos);
+                String endPosLetter = translatorHelper(endPos);
+
+                var playerName = userService.getUsername(command.getAuthToken());
+
+                ServerMessage moveNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                        (playerName + "moved from " + startPosLetter + startPos.getRow() + " to " + endPosLetter + endPos.getRow()),
+                        gameState.gameObject(), command.getPOV());
+
+                connections.broadcast(session, command, moveNotification, false);
+
+                var oppTeamColor = ChessGame.TeamColor.WHITE;
+                var oppTeamName = gameState.whiteUsername();
+                //TO DO move color check into wsHandler
+                if (command.getPOV().equals("WHITE")) {
+                    oppTeamColor = ChessGame.TeamColor.BLACK;
+                    oppTeamName = gameState.blackUsername();
+                }
+
+                if (gameState.gameObject().isInCheck(oppTeamColor)) {
+
+                    ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, oppTeamName + " is in check!", null, command.getPOV());
+                    connections.broadcast(session, command, checkNotification, true);
+                } else if (gameState.gameObject().isInCheckmate(oppTeamColor)) {
+                    ServerMessage checkMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, oppTeamName + " is in checkmate!", null, command.getPOV());
+                    connections.broadcast(session, command, checkMateNotification, true);
+                } else if (gameState.gameObject().isInStalemate(oppTeamColor)) {
+                    ServerMessage staleMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, oppTeamName + " is in stalemate!", null, command.getPOV());
+                    connections.broadcast(session, command, staleMateNotification, true);
+                }
+            } catch (Exception e) {
+                ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage(), null, command.getPOV());
+                connections.broadcast(session, command, errorMessage, false);
+            }
+        } else {
+            ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: Invalid move", null, command.getPOV());
+            connections.broadcast(session, command, errorMessage, false);
+        }
+
+        //TO DO
+        // server end deals with the logic for incorrect, gives the client an error message
+    }
+
+    private String translatorHelper(ChessPosition startPos) {
+        String startPosLetter = "h";
+        if (startPos.getColumn() == 1) {
+            startPosLetter = "a";
+        } else if (startPos.getColumn() == 2) {
+            startPosLetter = "b";
+        } else if (startPos.getColumn() == 3) {
+            startPosLetter = "c";
+        } else if (startPos.getColumn() == 4) {
+            startPosLetter = "d";
+        } else if (startPos.getColumn() == 5) {
+            startPosLetter = "e";
+        } else if (startPos.getColumn() == 6) {
+            startPosLetter = "f";
+        } else if (startPos.getColumn() == 7) {
+            startPosLetter = "g";
+        }
+        return startPosLetter;
     }
 
     private void leave(Session session, UserGameCommand command) {
@@ -112,12 +173,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 blackUser = null;
             }
             GameData gameAfterPlayerLeaves = new GameData(gameInfo.gameID(), whiteUser, blackUser, gameInfo.gameName(), gameInfo.gameObject());
-            userService.updatePlayerLeave(gameAfterPlayerLeaves);
+            userService.updateGameInfo(gameAfterPlayerLeaves);
         }
 
         ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, playerName + " left the game", null, null);
-        connections.remove(session, command, notification);
-        connections.broadcast(session, command, notification);
+        connections.remove(session, gameID);
+        connections.broadcast(session, command, notification, false);
     }
 
     private void resign(Session session, UserGameCommand command) {

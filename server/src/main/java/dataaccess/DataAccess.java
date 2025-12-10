@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import datamodel.GameData;
 import datamodel.Games;
 import datamodel.UserData;
@@ -18,6 +19,6 @@ public interface DataAccess {
     public int addGame(String gameName);
     // will not return a hashmap when we implement
     public Games getAllGames();
-    public void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName);
+    public void updateGameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame gameObject);
 
 }

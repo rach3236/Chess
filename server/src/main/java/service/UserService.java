@@ -1,6 +1,8 @@
 package service;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
 import dataaccess.*;
 import datamodel.*;
 
@@ -116,12 +118,11 @@ public class UserService {
         String gameName = gameInfo.gameName();
 
         //update gameData w/ new playerInfo
-        dataAccess.updateGameData(playerInfo.gameID(), whiteUsername, blackUsername, gameName);
+        dataAccess.updateGameData(playerInfo.gameID(), whiteUsername, blackUsername, gameName, gameInfo.gameObject());
     }
 
-    public void updatePlayerLeave(GameData gameInfo) {
-        //TO DO
-        dataAccess.updateGameData(gameInfo.gameID(), gameInfo.whiteUsername(), gameInfo.blackUsername(), gameInfo.gameName());
+    public void updateGameInfo(GameData gameInfo) {
+        dataAccess.updateGameData(gameInfo.gameID(), gameInfo.whiteUsername(), gameInfo.blackUsername(), gameInfo.gameName(), gameInfo.gameObject());
     }
 
     public String getUsername(String auth) {
@@ -130,6 +131,30 @@ public class UserService {
 
     public GameData getGameState(int gameID) {
         return dataAccess.getGameInfo(gameID);
+    }
+
+    public boolean checkValidMove(ChessMove move, int gameID, String pov) {
+        var game = dataAccess.getGameInfo(gameID);
+        var chessMoves = game.gameObject().validMoves(move.getStartPosition());
+
+        var teamColor = ChessGame.TeamColor.BLACK;
+        //TO DO move color check into wsHandler
+        if (pov.equals("WHITE")) {
+            teamColor = ChessGame.TeamColor.WHITE;
+        }
+
+        if (game.gameObject().getBoard().getPiece(move.getStartPosition()).getTeamColor() != teamColor) {
+            return false;
+            //TO DO Error message, player can't access pieces that aren't theirs
+        }
+
+        for (var validMove : chessMoves) {
+            if (move.equals(validMove)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public UserService() {
