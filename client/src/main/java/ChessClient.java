@@ -69,6 +69,7 @@ public class ChessClient implements NotificationHandler {
             case ServerMessage.ServerMessageType.LOAD_GAME:
                drawBoard(notification.getGame().getBoard(), clientPOV, new ArrayList<>(), new ChessPosition(0,0));
                gameBoardObject = notification.getGame().getBoard();
+               gameBoardGame = notification.getGame();
                 System.out.print("[GAME_PLAY] >>> ");
                break;
 
@@ -273,8 +274,7 @@ public class ChessClient implements NotificationHandler {
                 case "redraw":
                     var checkRedrawArgs = checkRedraw(arguments);
                     if (checkRedrawArgs != null) {System.out.println(checkRedrawArgs); break;}
-
-                    drawBoard(gameBoardObject, pov, new ArrayList<>(), new ChessPosition(0, 0));
+                       drawBoard(gameBoardObject, pov, new ArrayList<>(), new ChessPosition(0, 0));
                     break;
                 case "make_move":
                     if (!activeGame) {
@@ -701,7 +701,15 @@ public class ChessClient implements NotificationHandler {
                     Please format your input like this:
                     ---->'highlight <CHESS POSITION>'
                     """;
+        } else if (inputs.length < 2) {
+            return """ 
+                    Oh no! Looks like you have too few inputs:)
+                    Please format your input like this:
+                    ---->'highlight <CHESS POSITION>'
+                    """;
         }
+
+
 
         if (!inputs[1].matches("[a-h][1-8]")) {
             return """

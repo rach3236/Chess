@@ -37,7 +37,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void handleMessage(WsMessageContext ctx) throws Exception {
         try {
             UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-            System.out.println("blah: " + command.getCommandType());
 
             switch (command.getCommandType()) {
                 case CONNECT -> connect(ctx.session,  new Gson().fromJson(ctx.message(), UserGameCommand.class));
