@@ -74,12 +74,4 @@ public class ConnectionManager {
             System.out.println(e.getMessage());
         }
     }
-
-
-
-
-
-
-
-
 }

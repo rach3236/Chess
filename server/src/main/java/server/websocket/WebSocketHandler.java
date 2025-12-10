@@ -17,6 +17,8 @@ import service.UserService;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
+import static chess.ChessGame.TeamColor.BLACK;
+
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
     private static UserService userService;
@@ -94,31 +96,41 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
 
         if (!gameState.gameObject().getActiveGame()) {
-            ServerMessage notActiveNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "No more moves can be made; the game is complete!", null, null);
+            ServerMessage notActiveNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "No more moves can be made; the game is complete!",   null, null);
             connections.selfBroadcast(session, command, notActiveNotification);
             return;
         }
         String pov = "WHITE";
-
         var playerName = userService.getUsername(command.getAuthToken());
         if (playerName == null) {
             ServerMessage badAuthNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "Bad request for username", null, null);
             connections.selfBroadcast(session, command, badAuthNotification);
             return;
         }
-
-        var gameState1 = userService.getGameState(command.getGameID());
+        var observerStatus = false;
         ChessGame.TeamColor oppTeamColor;
         String oppTeamName;
 
-        if (playerName.equals(gameState1.whiteUsername())) {
-            oppTeamColor = ChessGame.TeamColor.BLACK;
+        if (playerName.equals(gameState.whiteUsername())) {
+            oppTeamColor = BLACK;
             oppTeamName = gameState.blackUsername();
-        } else {
+        } else if (playerName.equals(gameState.blackUsername())) {
             pov = "BLACK";
             oppTeamColor = ChessGame.TeamColor.WHITE;
             oppTeamName = gameState.whiteUsername();
+        } else {
+            pov = "WHITE";
+            observerStatus = true;
+            oppTeamColor = ChessGame.TeamColor.WHITE;
+            oppTeamName = gameState.whiteUsername();
         }
+        if (observerStatus) {
+            ServerMessage badAuthNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR),
+                    null, "Observers can't make moves, silly:)", null, null);
+            connections.selfBroadcast(session, command, badAuthNotification);
+            return;
+        }
+
         var validMove = userService.checkValidMove(command.getMove(), command.getGameID(), pov);
 
         if (validMove) {
@@ -139,22 +151,24 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
                 ServerMessage moveNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                         (playerName + " moved from " + startPosLetter + startPos.getRow() + " to " + endPosLetter + endPos.getRow()), null,
-                        gameState.gameObject(), pov);
-
+                        null, pov);
                 connections.otherPeopleBroadcast(session, command, moveNotification);
 
                 if (gameState.gameObject().isInCheck(oppTeamColor)) {
-                    ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, oppTeamName + " is in check!", null, null, pov);
+                    ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                            oppTeamName + " is in check!", null, null, pov);
                     connections.everybodyBroadcast(command, checkNotification);
                 } else if (gameState.gameObject().isInCheckmate(oppTeamColor)) {
                     gameState.gameObject().setActiveGame(false);
                     userService.updateGameInfo(gameState);
-                    ServerMessage checkMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, oppTeamName + " is in checkmate!", null, null, pov);
+                    ServerMessage checkMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                            oppTeamName + " is in checkmate!", null, null, pov);
                     connections.everybodyBroadcast(command, checkMateNotification);
                 } else if (gameState.gameObject().isInStalemate(oppTeamColor)) {
                     gameState.gameObject().setActiveGame(false);
                     userService.updateGameInfo(gameState);
-                    ServerMessage staleMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, oppTeamName + " is in stalemate!", null, null, pov);
+                    ServerMessage staleMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                            oppTeamName + " is in stalemate!", null, null, pov);
                     connections.everybodyBroadcast(command, staleMateNotification);
                 }
             } catch (Exception e) {
@@ -199,13 +213,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             }
             String whiteUser = gameInfo.whiteUsername();
             String blackUser = gameInfo.blackUsername();
-
-            if (command.getPOV().equals("WHITE") && gameInfo.whiteUsername() != null && gameInfo.whiteUsername().equals(playerName)) {
+//
+            if (playerName.equals(whiteUser)) {
                 whiteUser = null;
             }
-            if (command.getPOV().equals("BLACK") && gameInfo.blackUsername() != null && gameInfo.blackUsername().equals(playerName)) {
+            if (playerName.equals(blackUser)) {
                 blackUser = null;
             }
+
             GameData gameAfterPlayerLeaves = new GameData(gameInfo.gameID(), whiteUser, blackUser,
                     gameInfo.gameName(), gameInfo.gameObject());
             userService.updateGameInfo(gameAfterPlayerLeaves);
@@ -219,21 +234,34 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void resign(Session session, UserGameCommand command) {
         System.out.println(command.observerStatus());
-        if (command.observerStatus()) {
+
+        var playerName = userService.getUsername(command.getAuthToken());
+        var gameState = userService.getGameState(command.getGameID());
+
+        var observerStatus = true;
+        if (playerName.equals(gameState.whiteUsername()) || playerName.equals(gameState.blackUsername())) {
+            observerStatus = false;
+        }
+
+        if (observerStatus) {
             ServerMessage errorMessage = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "Observers cannot resign", null, null);
             connections.selfBroadcast(session, command, errorMessage);
             return;
         }
-        var game = userService.getGameState(command.getGameID());
-        if (game == null) {
-            ServerMessage errorNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "Invalid Game ID", null, null);
-            connections.selfBroadcast(session, command, errorNotification);
+
+        if (!gameState.gameObject().getActiveGame()) {
+            ServerMessage notActiveNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "No more moves can be made; the game is complete!", null, null);
+            connections.selfBroadcast(session, command, notActiveNotification);
             return;
         }
-        game.gameObject().setActiveGame(false);
-        userService.updateGameInfo(game);
 
-        var playerName = userService.getUsername(command.getAuthToken());
+        if (playerName == null) {
+            ServerMessage badAuthNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), null, "Bad request for username", null, null);
+            connections.selfBroadcast(session, command, badAuthNotification);
+            return;
+        }
+        gameState.gameObject().setActiveGame(false);
+        userService.updateGameInfo(gameState);
 
         ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, playerName + " has resigned. ", null, null, null);
         connections.everybodyBroadcast(command, notification);
