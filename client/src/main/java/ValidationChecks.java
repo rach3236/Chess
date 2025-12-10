@@ -2,7 +2,7 @@ public class ValidationChecks {
 
 
 
-    public static ValidationChecks() {
+    public ValidationChecks() {
 
     }
 
