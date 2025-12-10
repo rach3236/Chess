@@ -25,12 +25,13 @@ public class ServerMessage {
         NOTIFICATION
     }
 
-    public ServerMessage(ServerMessageType type, String message, ChessGame game, String pov) {
+    public ServerMessage(ServerMessageType type, String message, String errorMessage, ChessGame game, String pov) {
         this.serverMessageType = type;
         this.message = message;
-        this.errorMessage = message;
+        this.errorMessage = errorMessage;
         this.game = game;
         this.pov = pov;
+
     }
 
     public ServerMessageType getServerMessageType() {

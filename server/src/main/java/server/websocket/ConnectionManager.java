@@ -32,16 +32,27 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcast(Session session, UserGameCommand command, ServerMessage notification, boolean allUsers) {
+    public void selfBroadcast(Session session, UserGameCommand command, ServerMessage notification) {
         try {
             var sessionsList = connections.get(command.getGameID());
             for (Session sesh : sessionsList) {
-                if (notification.getServerMessageType() == ServerMessage.ServerMessageType.ERROR && sesh == session) {
+                if (sesh == session) {
                     String msg = new Gson().toJson(notification);
                     sesh.getRemote().sendString(msg);
                     return;
                 }
-                if (!allUsers && sesh == session) {
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void otherPeopleBroadcast(Session session, UserGameCommand command, ServerMessage notification) {
+        try {
+            var sessionsList = connections.get(command.getGameID());
+            for (Session sesh : sessionsList) {
+
+                if (sesh == session) {
                     continue;
                 }
                 String msg = new Gson().toJson(notification);
@@ -51,4 +62,24 @@ public class ConnectionManager {
             System.out.println(e.getMessage());
         }
     }
+
+    public void everybodyBroadcast(UserGameCommand command, ServerMessage notification) {
+        try {
+            var sessionsList = connections.get(command.getGameID());
+            for (Session sesh : sessionsList) {
+                String msg = new Gson().toJson(notification);
+                sesh.getRemote().sendString(msg);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+
+
+
+
+
+
+
 }

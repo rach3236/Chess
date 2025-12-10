@@ -317,9 +317,7 @@ public class ChessClient implements NotificationHandler {
 
                     if (line.equals("y")) {
                         try {
-
-                            //TO DO figure out whether to pass inn pov or figure it out on the server end
-                            webSocketServer.resign(helper.authKey, gameID, false, pov);
+                            webSocketServer.resign(helper.authKey, gameID, observerStatus, pov);
                             break;
                         } catch (Exception e) {
                             System.out.println(e.getMessage());
