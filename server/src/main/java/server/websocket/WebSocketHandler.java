@@ -79,6 +79,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void makeMove(Session session, UserGameCommand command) {
         //TO DO
         var gameState = userService.getGameState(command.getGameID());
+        if (!gameState.gameObject().getActiveGame()) {
+            ServerMessage notActiveNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR), "smth", null, null);
+            connections.broadcast(session, command, notActiveNotification, true);
+        }
         var validMove = userService.checkValidMove(command.getMove(), command.getGameID(), command.getPOV());
         if (validMove) {
             try {
@@ -117,9 +121,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     ServerMessage checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, oppTeamName + " is in check!", null, command.getPOV());
                     connections.broadcast(session, command, checkNotification, true);
                 } else if (gameState.gameObject().isInCheckmate(oppTeamColor)) {
+                    gameState.gameObject().setActiveGame(false);
+                    userService.updateGameInfo(gameState);
                     ServerMessage checkMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, oppTeamName + " is in checkmate!", null, command.getPOV());
                     connections.broadcast(session, command, checkMateNotification, true);
                 } else if (gameState.gameObject().isInStalemate(oppTeamColor)) {
+                    gameState.gameObject().setActiveGame(false);
+                    userService.updateGameInfo(gameState);
                     ServerMessage staleMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, oppTeamName + " is in stalemate!", null, command.getPOV());
                     connections.broadcast(session, command, staleMateNotification, true);
                 }
@@ -182,15 +190,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void resign(Session session, UserGameCommand command) {
-        //TO DO
-        // marks the game as over
-        // no more moves possible
 
-        // Questions TA: bro, what do you do w/ the game state when a player resigns?
+        if (command.observerStatus()) {
+            return;
+        }
+        var game = userService.getGameState(command.getGameID());
+        game.gameObject().setActiveGame(false);
+        userService.updateGameInfo(game);
 
-        // userService.updateGameState
-        // connections.broadcast(notification that opposite player of resignation wins)
-        // leave(command)
+        var playerName = userService.getUsername(command.getAuthToken());
+
+        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, playerName + " has resigned. ", null, null);
+        connections.broadcast(session, command, notification, false);
     }
 }
 

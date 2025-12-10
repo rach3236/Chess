@@ -8,6 +8,7 @@ import websocket.WebSocketFacade;
 import websocket.messages.ServerMessage;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
 
@@ -27,6 +28,7 @@ public class ChessClient implements NotificationHandler {
     //highlighting square color combo
     //(phase 6)
     private static ArrayList<GameData> gameList;
+    private static ChessGame gameBoardGame;
     private static ChessBoard gameBoardObject;
 
     public ChessClient() throws Exception {
@@ -38,6 +40,7 @@ public class ChessClient implements NotificationHandler {
 
         var helper = new ArgsHelper();
         helper.loggedStatus = false;
+        gameBoardGame = new ChessGame();
         gameBoardObject = new ChessGame().getBoard();
 
         while (true) {
@@ -65,7 +68,7 @@ public class ChessClient implements NotificationHandler {
 
         switch (notification.getServerMessageType()) {
             case ServerMessage.ServerMessageType.LOAD_GAME:
-               drawBoard(notification.getGame().getBoard(), notification.getPOV(), null, null);
+               drawBoard(notification.getGame().getBoard(), notification.getPOV(), new ArrayList<>(), new ChessPosition(0,0));
                gameBoardObject = notification.getGame().getBoard();
                break;
 
@@ -268,7 +271,7 @@ public class ChessClient implements NotificationHandler {
                     var checkRedrawArgs = checkRedraw(arguments);
                     if (checkRedrawArgs != null) {System.out.println(checkRedrawArgs); break;}
 
-                    drawBoard(gameBoardObject, pov, null, null);
+                    drawBoard(gameBoardObject, pov, new ArrayList<>(), new ChessPosition(0, 0));
                     break;
                 case "make_move":
                     if (!activeGame) {
@@ -278,9 +281,7 @@ public class ChessClient implements NotificationHandler {
 
                     var checkMoveArgs = checkMakeMove(arguments);
                     if (checkMoveArgs != null) {System.out.println(checkMoveArgs); break;}
-                    //interpret move
-                    //if white, a is ro2=1
-                    //expected user arguments: make_move a4 a5
+
                     var startPos = new ChessPosition(Integer.parseInt(arguments[1].substring(1,2)), columnTranslator(arguments[1].substring(0,1)));
                     var endPos = new ChessPosition(Integer.parseInt(arguments[2].substring(1,2)), columnTranslator(arguments[2].substring(0,1)));
 
@@ -327,6 +328,11 @@ public class ChessClient implements NotificationHandler {
                     var checkHighlightResponse = checkHighlight(arguments);
                     if (checkHighlightResponse != null) {System.out.println(checkHighlightResponse); break;}
 
+                    ChessPosition highlightPos = new ChessPosition(Integer.parseInt(arguments[1].substring(1,2)), columnTranslator(arguments[1].substring(0,1)));
+
+                    var movesList = gameBoardGame.validMoves(highlightPos);
+
+                    drawBoard(gameBoardObject, pov, movesList, highlightPos);
                     //TO DO:
                     // allows user to input piece for which they want legal moves
                     // get possible moves (pieceMoves in ChessPiece.java, takes a board and a current position)
@@ -367,7 +373,7 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
-    private static void drawBoard(ChessBoard board, String pov, ArrayList<ChessMove> moves, ChessPosition currPos) {
+    private static void drawBoard(ChessBoard board, String pov, Collection<ChessMove> moves, ChessPosition currPos) {
 
         ArrayList<String> rows = new ArrayList<>(
                 List.of(" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 ")
@@ -377,13 +383,15 @@ public class ChessClient implements NotificationHandler {
         String columns = "    a  b  c  d  e  f  g  h    ";
         if (povBlack) {
             columns = new StringBuilder(columns).reverse().toString();
-            printBoardForBlack(board, columns, rows);
+            printBoardForBlack(board, columns, rows, moves, currPos);
         } else {
-            printBoardForWhite(board, columns, rows);
+            printBoardForWhite(board, columns, rows, moves, currPos);
         }
     }
 
-    private static void printBoardForWhite(ChessBoard board, String columns, ArrayList<String> rows) {
+    private static void printBoardForWhite(ChessBoard board, String columns, ArrayList<String> rows, Collection<ChessMove> moves, ChessPosition currPos) {
+
+
         for (int i = 0; i < 10; i++) {
             if (i == 0 || i == 9) {
                 System.out.println(BLACKONGRAY + columns + RESET);
@@ -396,13 +404,13 @@ public class ChessClient implements NotificationHandler {
                     line += BLACKONGRAY + rows.get(rows.size() - i);
                     continue;
                 }
-                line += colorHelper(new ChessPosition(9 - i, j), board);
+                line += colorHelper(new ChessPosition(9 - i, j), board, moves, currPos);
             }
             System.out.println(line + RESET);
         }
     }
 
-    private static void printBoardForBlack(ChessBoard board, String columns, ArrayList<String> rows) {
+    private static void printBoardForBlack(ChessBoard board, String columns, ArrayList<String> rows, Collection<ChessMove> moves, ChessPosition currPos) {
         for (int i = 9; i >= 0; i--) {
             if (i == 0 || i == 9) {
                 System.out.println(BLACKONGRAY + columns + RESET);
@@ -415,13 +423,19 @@ public class ChessClient implements NotificationHandler {
                     line += BLACKONGRAY + rows.get(rows.size() - i);
                     continue;
                 }
-                line += colorHelper(new ChessPosition(9 - i, j), board);
+                line += colorHelper(new ChessPosition(9 - i, j), board, moves, currPos);
             }
             System.out.println(line + RESET);
         }
     }
 
-    private static String colorHelper(ChessPosition position, ChessBoard board) {
+    private static String colorHelper(ChessPosition position, ChessBoard board, Collection<ChessMove> moves, ChessPosition startPos) {
+        // green is 42
+        // light green is 102
+        //black foregr is 30
+        // yellow is 103
+//        if (position)
+
         String color = "\u001b[";
         var piece = board.getPiece(position);
         String foregroundColor = "34;";
@@ -430,14 +444,39 @@ public class ChessClient implements NotificationHandler {
             if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                 foregroundColor = "31;";
             }
+            if (position.equals(startPos) || moveContains(moves, position)) {
+                foregroundColor = "30;";
+            }
             pieceType = convertPieceType(piece.getPieceType());
         }
+
         String backgroundColor = "107;";
+        if (moveContains(moves, position)) {
+            backgroundColor = "102;";
+        }
+
         if ((position.getRow() % 2 == 0 && position.getColumn() % 2 == 0) ||
                 (position.getRow() % 2 == 1 && position.getColumn() % 2 == 1)) {
+
             backgroundColor = "40;";
+
+            if (moveContains(moves, position)) {
+                backgroundColor = "42;";
+            }
+        }
+        if (position.equals(startPos)) {
+            backgroundColor = "103;";
         }
         return color + foregroundColor + backgroundColor + "1m" + " " + pieceType + " ";
+    }
+
+    private static boolean moveContains(Collection<ChessMove> moves, ChessPosition chessPos) {
+        for (var move : moves) {
+            if (move.getEndPosition().equals(chessPos)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String convertPieceType(ChessPiece.PieceType type) {

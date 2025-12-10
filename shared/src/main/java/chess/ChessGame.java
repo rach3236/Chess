@@ -14,11 +14,13 @@ public class ChessGame {
     private ChessBoard board;
     private TeamColor team;
     private ChessBoard newBoard;
+    private boolean activeGame;
 
     public ChessGame() {
         this.board = new ChessBoard();
         this.board.resetBoard();
         this.team = TeamColor.WHITE;
+        this.activeGame = true;
     }
 
 
@@ -32,6 +34,14 @@ public class ChessGame {
             }
         }
         return newBoard;
+    }
+
+    public boolean getActiveGame() {
+        return activeGame;
+    }
+
+    public void setActiveGame(boolean newState) {
+        activeGame = newState;
     }
 
     //helper function to find the king
