@@ -283,6 +283,19 @@ public class ChessClient implements NotificationHandler {
                     var endPos = new ChessPosition(Integer.parseInt(arguments[2].substring(1,2)), columnTranslator(arguments[2].substring(0,1)));
 
                     var move = new ChessMove(startPos, endPos, null);
+                    if (checkPromotion(move, pov)) {
+                        System.out.println("Looks like you're about to promote! Which piece do you want to promote to?" +
+                                "\n'queen' | 'bishop' | 'rook' | 'knight'");
+                        Scanner scanner2 = new Scanner(System.in);
+                        String line2 = scanner.nextLine();
+                        var promoArguments = line.split(" ");
+
+                        if (promoArguments[0].equalsIgnoreCase("queen") || promoArguments[0].equalsIgnoreCase("bishop")
+                                || promoArguments[0].equalsIgnoreCase("rook") || promoArguments[0].equalsIgnoreCase("knight")) {
+                            System.out.println("Not one of the options. Invalid move. You suck.");
+                            break;
+                        }
+                    }
 
                     try {
                         webSocketServer.makeMove(helper.authKey, gameID, false, pov, move);
@@ -327,6 +340,11 @@ public class ChessClient implements NotificationHandler {
                     ChessPosition highlightPos = new ChessPosition(Integer.parseInt(arguments[1].substring(1,2)),
                             columnTranslator(arguments[1].substring(0,1)));
 
+                    if (gameBoardGame.getBoard().getPiece(highlightPos) == null) {
+                        System.out.println("There's no piece there silly!");
+                        break;
+                    }
+
                     var movesList = gameBoardGame.validMoves(highlightPos);
 
                     drawBoard(gameBoardObject, pov, movesList, highlightPos);
@@ -336,6 +354,18 @@ public class ChessClient implements NotificationHandler {
                     return;
             }
         }
+    }
+
+    public static boolean checkPromotion(ChessMove move, String pov) {
+        var startPos = move.getStartPosition();
+        var endPos = move.getEndPosition();
+
+        if (pov.equals("WHITE") && gameBoardObject.getPiece(startPos).getPieceType() == ChessPiece.PieceType.PAWN && endPos.getRow() == 8) {
+            return true;
+        } else if (pov.equals("BLACK") && gameBoardObject.getPiece(startPos).getPieceType() == ChessPiece.PieceType.PAWN && endPos.getRow() == 1) {
+            return true;
+        }
+        return false;
     }
 
     private static int columnTranslator(String letter) {

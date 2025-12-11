@@ -135,6 +135,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.selfBroadcast(session, command, badAuthNotification);
             return;
         }
+        if (gameState.gameObject().getBoard().getPiece(command.getMove().getStartPosition()) == null) {
+            ServerMessage errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null,
+                    "Error: invalid move, there's no piece there:)", null, pov);
+            connections.selfBroadcast(session, command, errorMessage);
+            return;
+        }
 
         var validMove = userService.checkValidMove(command.getMove(), command.getGameID(), pov);
 

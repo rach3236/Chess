@@ -133,7 +133,25 @@ public class UserService {
         return dataAccess.getGameInfo(gameID);
     }
 
+    public boolean checkTurn(int gameID, String pov) {
+        var game = getGameState(gameID);
+        var playerColor = ChessGame.TeamColor.BLACK;
+
+        if (pov.equals("WHITE")) {
+            playerColor = ChessGame.TeamColor.WHITE;
+        }
+        if (game.gameObject().getTeamTurn() == playerColor) {
+            return true;
+        }
+
+        return false;
+    }
+
     public boolean checkValidMove(ChessMove move, int gameID, String pov) {
+        if (!checkTurn(gameID, pov)) {
+            return false;
+        }
+
         var game = dataAccess.getGameInfo(gameID);
         var chessMoves = game.gameObject().validMoves(move.getStartPosition());
 
@@ -156,6 +174,20 @@ public class UserService {
 
         return false;
     }
+
+//    public boolean checkPromotion(ChessMove move, int gameID, String pov) {
+//        var game = getGameState(gameID);
+//        var startPos = move.getStartPosition();
+//        var endPos = move.getEndPosition();
+//        var board = game.gameObject().getBoard();
+//
+//        if (pov.equals("WHITE") && board.getPiece(startPos).getPieceType() == ChessPiece.PieceType.PAWN && endPos.getRow() == 8) {
+//            return true;
+//        } else if (pov.equals("BLACK") && board.getPiece(startPos).getPieceType() == ChessPiece.PieceType.PAWN && endPos.getRow() == 1) {
+//            return true;
+//        }
+//        return false;
+//    }
 
     public UserService() {
 //        this.dataAccess = new MemoryDataAccess();

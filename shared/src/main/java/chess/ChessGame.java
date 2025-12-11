@@ -154,9 +154,9 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece piece = board.getPiece(move.getStartPosition());
         if (piece == null) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("There's no piece there?");
         } else if (piece.getTeamColor() != getTeamTurn()) {
-            throw new InvalidMoveException("It's not your turn anymore:)");
+            throw new InvalidMoveException("It's not your turn:)");
         } else if (validMoves(move.getStartPosition()).contains(move)) {
             if (move.getPromotionPiece() != null) {
                 ChessPiece promoPiece = new ChessPiece(piece.getTeamColor(), ChessPiece.PieceType.PAWN);
