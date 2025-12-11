@@ -243,16 +243,12 @@ public class ChessClient implements NotificationHandler {
     public static void gamePlayUI(ArgsHelper helper, int gameID, boolean observerStatus, String pov) {
         System.out.println("Welcome to the game!");
         while (true) {
-
             boolean activeGame = true;
-
             System.out.print("[GAME_PLAY] >>> ");
             Scanner scanner = new Scanner(System.in);
             String line = scanner.nextLine();
             var arguments = line.split(" ");
-
             switch (arguments[0].toLowerCase()) {
-
                 case "help":
                     System.out.println("""
                             List of possible commands:
@@ -275,12 +271,11 @@ public class ChessClient implements NotificationHandler {
                         System.out.println("The game is over dummy;)");
                         break;
                     }
-
                     var checkMoveArgs = validation.checkMakeMove(arguments);
                     if (checkMoveArgs != null) {System.out.println(checkMoveArgs); break;}
 
-                    var startPos = new ChessPosition(Integer.parseInt(arguments[1].substring(1,2)), columnTranslator(arguments[1].substring(0,1)));
-                    var endPos = new ChessPosition(Integer.parseInt(arguments[2].substring(1,2)), columnTranslator(arguments[2].substring(0,1)));
+                    var startPos = new ChessPosition(Integer.parseInt(arguments[1].substring(1,2)), validation.columnTranslator(arguments[1].substring(0,1)));
+                    var endPos = new ChessPosition(Integer.parseInt(arguments[2].substring(1,2)), validation.columnTranslator(arguments[2].substring(0,1)));
 
                     var move = new ChessMove(startPos, endPos, null);
                     if (checkPromotion(move, pov)) {
@@ -296,7 +291,6 @@ public class ChessClient implements NotificationHandler {
                             break;
                         }
                     }
-
                     try {
                         webSocketServer.makeMove(helper.authKey, gameID, false, pov, move);
                     } catch (Exception e) {
@@ -306,7 +300,6 @@ public class ChessClient implements NotificationHandler {
                 case "leave":
                     var checkLeaveArgs = validation.checkLeave(arguments);
                     if (checkLeaveArgs != null) {System.out.println(checkLeaveArgs); break;}
-
                     try {
                         webSocketServer.leave(helper.authKey, gameID, observerStatus, pov);
                         clientPOV = "WHITE";
@@ -318,10 +311,8 @@ public class ChessClient implements NotificationHandler {
                 case "resign":
                     var checkResignArgs = validation.checkResign(arguments);
                     if (checkResignArgs != null) {System.out.println(checkResignArgs); break;}
-
                     System.out.println("Do you really want to resign?👀 ('y'/'n') >>> ");
                     line = scanner.nextLine();
-
                     if (line.equals("y")) {
                         try {
                             webSocketServer.resign(helper.authKey, gameID, observerStatus, pov);
@@ -329,24 +320,18 @@ public class ChessClient implements NotificationHandler {
                         } catch (Exception e) {
                             System.out.println(e.getMessage());
                         }
-
                     }
-
                     break;
                 case "highlight":
                     var checkHighlightResponse = validation.checkHighlight(arguments);
                     if (checkHighlightResponse != null) {System.out.println(checkHighlightResponse); break;}
-
                     ChessPosition highlightPos = new ChessPosition(Integer.parseInt(arguments[1].substring(1,2)),
-                            columnTranslator(arguments[1].substring(0,1)));
-
+                            validation.columnTranslator(arguments[1].substring(0,1)));
                     if (gameBoardGame.getBoard().getPiece(highlightPos) == null) {
                         System.out.println("There's no piece there silly!");
                         break;
                     }
-
                     var movesList = gameBoardGame.validMoves(highlightPos);
-
                     drawBoard(gameBoardObject, pov, movesList, highlightPos);
                     break;
                 default:
@@ -366,29 +351,6 @@ public class ChessClient implements NotificationHandler {
             return true;
         }
         return false;
-    }
-
-    private static int columnTranslator(String letter) {
-        switch (letter) {
-            case "a":
-                return 1;
-            case "b":
-                return 2;
-            case "c":
-                return 3;
-            case "d":
-                return 4;
-            case "e":
-                return 5;
-            case "f":
-                return 6;
-            case "g":
-                return 7;
-            case "h":
-                return 8;
-            default:
-                return -1;
-        }
     }
 
     private static void drawBoard(ChessBoard board, String pov, Collection<ChessMove> moves, ChessPosition currPos) {
@@ -466,19 +428,6 @@ public class ChessClient implements NotificationHandler {
         String backgroundColor = "107;";
         if (moveContains(moves, position)) {
             backgroundColor = "102;";
-        }
-
-        if ((position.getRow() % 2 == 0 && position.getColumn() % 2 == 0) ||
-                (position.getRow() % 2 == 1 && position.getColumn() % 2 == 1)) {
-
-            backgroundColor = "40;";
-
-            if (moveContains(moves, position)) {
-                backgroundColor = "42;";
-            }
-        }
-        if (position.equals(startPos)) {
-            backgroundColor = "103;";
         }
         return color + foregroundColor + backgroundColor + "1m" + " " + pieceType + " ";
     }

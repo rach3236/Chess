@@ -175,20 +175,6 @@ public class UserService {
         return false;
     }
 
-//    public boolean checkPromotion(ChessMove move, int gameID, String pov) {
-//        var game = getGameState(gameID);
-//        var startPos = move.getStartPosition();
-//        var endPos = move.getEndPosition();
-//        var board = game.gameObject().getBoard();
-//
-//        if (pov.equals("WHITE") && board.getPiece(startPos).getPieceType() == ChessPiece.PieceType.PAWN && endPos.getRow() == 8) {
-//            return true;
-//        } else if (pov.equals("BLACK") && board.getPiece(startPos).getPieceType() == ChessPiece.PieceType.PAWN && endPos.getRow() == 1) {
-//            return true;
-//        }
-//        return false;
-//    }
-
     public UserService() {
 //        this.dataAccess = new MemoryDataAccess();
         this.dataAccess = new SQLDataAccess();

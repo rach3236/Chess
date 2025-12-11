@@ -90,14 +90,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void makeMove(Session session, UserGameCommand command) {
         var gameState = userService.getGameState(command.getGameID());
-
         if (gameState == null) {
             ServerMessage errorNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR),
                     null, "Error: invalid game ID", null, null);
             connections.selfBroadcast(session, command, errorNotification);
             return;
         }
-
         if (!gameState.gameObject().getActiveGame()) {
             ServerMessage notActiveNotification = new ServerMessage((ServerMessage.ServerMessageType.ERROR),
                     null, "No more moves can be made; the game is complete!",   null, null);
@@ -115,7 +113,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var observerStatus = false;
         ChessGame.TeamColor oppTeamColor;
         String oppTeamName;
-
         if (playerName.equals(gameState.whiteUsername())) {
             oppTeamColor = BLACK;
             oppTeamName = gameState.blackUsername();
@@ -141,9 +138,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.selfBroadcast(session, command, errorMessage);
             return;
         }
-
         var validMove = userService.checkValidMove(command.getMove(), command.getGameID(), pov);
-
         if (validMove) {
             try {
                 gameState.gameObject().makeMove(command.getMove());
@@ -152,8 +147,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 ServerMessage loadGameNotification = new ServerMessage
                         (ServerMessage.ServerMessageType.LOAD_GAME, null, null, gameState.gameObject(), pov);
                 connections.everybodyBroadcast(command, loadGameNotification);
-
-                //broadcast move
                 var startPos = command.getMove().getStartPosition();
                 var endPos = command.getMove().getEndPosition();
 
