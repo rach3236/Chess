@@ -274,8 +274,10 @@ public class ChessClient implements NotificationHandler {
                     var checkMoveArgs = validation.checkMakeMove(arguments);
                     if (checkMoveArgs != null) {System.out.println(checkMoveArgs); break;}
 
-                    var startPos = new ChessPosition(Integer.parseInt(arguments[1].substring(1,2)), validation.columnTranslator(arguments[1].substring(0,1)));
-                    var endPos = new ChessPosition(Integer.parseInt(arguments[2].substring(1,2)), validation.columnTranslator(arguments[2].substring(0,1)));
+                    var startPos = new ChessPosition(Integer.parseInt(arguments[1].substring(1,2)),
+                            validation.columnTranslator(arguments[1].substring(0,1)));
+                    var endPos = new ChessPosition(Integer.parseInt(arguments[2].substring(1,2)),
+                            validation.columnTranslator(arguments[2].substring(0,1)));
 
                     var move = new ChessMove(startPos, endPos, null);
                     if (checkPromotion(move, pov)) {
@@ -377,14 +379,7 @@ public class ChessClient implements NotificationHandler {
                 continue;
             }
             String line = "";
-            for (int j = 0; j < 10; j++) {
 
-                if (j == 0 || j == 9) {
-                    line += BLACKONGRAY + rows.get(rows.size() - i);
-                    continue;
-                }
-                line += colorHelper(new ChessPosition(9 - i, j), board, moves, currPos);
-            }
             System.out.println(line + RESET);
         }
     }
